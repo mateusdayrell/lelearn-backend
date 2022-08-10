@@ -48,11 +48,11 @@ class Usuario extends Model {
             },
           },
         },
-        senha: {
+        senha: { // senha COM hash
           type: Sequelize.STRING,
           defaultValue: '',
         },
-        password: {
+        password: { // senha SEM hash
           type: Sequelize.VIRTUAL,
           defaultValue: '',
           validate: {
@@ -84,6 +84,10 @@ class Usuario extends Model {
     });
 
     return this;
+  }
+
+  validarSenha(senha) {
+    return bcryptjs.compare(senha, this.senha);
   }
 }
 
