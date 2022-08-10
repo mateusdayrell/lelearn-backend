@@ -7,8 +7,7 @@ class Usuario extends Model {
       { // init Model
         cpf: {
           type: Sequelize.STRING(11),
-          defaultValue: '',
-          required: true,
+          primaryKey: true,
           validate: {
             len: {
               args: [11, 11],
@@ -19,7 +18,7 @@ class Usuario extends Model {
         nome: {
           type: Sequelize.STRING(40),
           defaultValue: '',
-          required: true,
+          allowNull: false,
           validate: {
             len: {
               args: [3, 40],
@@ -30,7 +29,7 @@ class Usuario extends Model {
         telefone: {
           type: Sequelize.STRING(11),
           defaultValue: '',
-          required: false,
+          allowNull: false,
           validate: {
             len: {
               args: [10, 11],
@@ -41,7 +40,7 @@ class Usuario extends Model {
         email: {
           type: Sequelize.STRING(50),
           defaultValue: '',
-          required: true,
+          allowNull: false,
           unique: true,
           validate: {
             isEmail: {
@@ -66,11 +65,11 @@ class Usuario extends Model {
         tipo: {
           type: Sequelize.INTEGER,
           defaultValue: '',
-          required: true,
+          allowNull: false,
         },
         data_nasc: {
           type: Sequelize.DATE,
-          required: true,
+          allowNull: true,
         },
       },
       {
@@ -79,7 +78,9 @@ class Usuario extends Model {
     );
 
     this.addHook('beforeSave', async (usuario) => {
-      usuario.senha = await bcryptjs.hash(usuario.password, 8);
+      if (usuario.password) {
+        usuario.senha = await bcryptjs.hash(usuario.password, 8);
+      }
     });
 
     return this;
