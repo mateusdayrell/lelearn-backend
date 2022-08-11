@@ -4,11 +4,12 @@ import { Router } from 'express';
 import loginRequired from '../middlewares/loginRequired';
 
 // CONTROLLERS
+import tokenController from '../controllers/TokenController';
 import homeController from '../controllers/HomeController';
 import usuarioController from '../controllers/UsuarioController';
 import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
-import tokenController from '../controllers/TokenController';
+import treinamentoController from '../controllers/TreinamentoController';
 
 const router = new Router();
 
@@ -38,5 +39,12 @@ router.get('/videos/:id', videoController.show);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
 router.delete('/videos/:id', videoController.destroy);
+
+// TREINAMENTOS
+router.get('/treinamentos/', treinamentoController.index);
+router.get('/treinamentos/:id', treinamentoController.show);
+router.post('/treinamentos/', treinamentoController.store);
+router.put('/treinamentos/:id', treinamentoController.update);
+router.delete('/treinamentos/:id', treinamentoController.destroy);
 
 export default router;
