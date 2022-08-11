@@ -6,28 +6,33 @@ class Treinamento extends Model {
       { // init Model
         cod_treinamento: {
           type: Sequelize.STRING(4),
-          defaultValue: '',
-          allowNull: false,
-          len: {
-            args: [4, 4],
-            msg: 'O código do treinamento deve ter 4 caracteres.',
+          primaryKey: true,
+          validate: {
+            len: {
+              args: [4, 4],
+              msg: 'O código do treinamento deve ter 4 caracteres.',
+            },
           },
         },
         nome_treinamento: {
           type: Sequelize.STRING(30),
           defaultValue: '',
           allowNull: false,
-          len: {
-            args: [3, 30],
-            msg: 'O nome do treinamento deve ter entre 3 e 30 caracteres.',
+          validate: {
+            len: {
+              args: [3, 30],
+              msg: 'O nome do treinamento deve ter entre 3 e 30 caracteres.',
+            },
           },
         },
         desc_treinamento: {
           type: Sequelize.STRING(150),
           allowNull: true,
-          len: {
-            args: [0, 150],
-            msg: 'O código do treinamento deve ter no máximo 150 caracteres.',
+          validate: {
+            len: {
+              args: [0, 150],
+              msg: 'A descrição do treinamento deve ter no máximo 150 caracteres.',
+            },
           },
         },
       },

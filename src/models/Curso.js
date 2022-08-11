@@ -16,7 +16,6 @@ class Curso extends Model {
         },
         nome_curso: {
           type: Sequelize.STRING(40),
-          defaultValue: '',
           allowNull: false,
           validate: {
             len: {
@@ -31,7 +30,7 @@ class Curso extends Model {
           validate: {
             len: {
               args: [0, 150],
-              msg: 'A descrição do vídeo deve ter no máximo 150 caracteres.',
+              msg: 'A descrição do treinamento deve ter no máximo 150 caracteres.',
             },
           },
         },
