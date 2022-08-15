@@ -42,6 +42,14 @@ class Treinamento extends Model {
     );
     return this;
   }
+
+  static associate(models) {
+    this.belongsToMany(models.Usuario, {
+      through: 'usuarios_treinamentos',
+      as: 'treinamentos',
+      foreignKey: 'cod_treinamento',
+    });
+  }
 }
 
 export default Treinamento;

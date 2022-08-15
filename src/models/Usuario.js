@@ -89,6 +89,14 @@ class Usuario extends Model {
   validarSenha(senha) {
     return bcryptjs.compare(senha, this.senha);
   }
+
+  static associate(models) {
+    this.belongsToMany(models.Treinamento, {
+      through: 'usuarios_treinamentos',
+      as: 'usuarios',
+      foreignKey: 'cpf',
+    });
+  }
 }
 
 export default Usuario;
