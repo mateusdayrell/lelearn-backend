@@ -42,6 +42,14 @@ class Curso extends Model {
 
     return this;
   }
+
+  static associate(models) {
+    this.belongsToMany(models.Treinamento, {
+      through: 'treinamentos_cursos',
+      as: 'treinamentos',
+      foreignKey: 'cod_curso',
+    });
+  }
 }
 
 export default Curso;

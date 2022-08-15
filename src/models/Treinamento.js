@@ -45,8 +45,14 @@ class Treinamento extends Model {
 
   static associate(models) {
     this.belongsToMany(models.Usuario, {
-      through: 'usuarios_treinamentos',
-      as: 'treinamentos',
+      through: 'treinamentos_usuarios',
+      as: 'usuarios',
+      foreignKey: 'cod_treinamento',
+    });
+
+    this.belongsToMany(models.Cursos, {
+      through: 'treinamentos_cursos',
+      as: 'cursos',
       foreignKey: 'cod_treinamento',
     });
   }
