@@ -5,8 +5,9 @@ import Usuario from '../models/Usuario';
 import Curso from '../models/Curso';
 import Video from '../models/Video';
 import Comentario from '../models/Comentario';
+import TreinamentoUsuario from '../models/TreinamentoUsuario';
 
-const models = [Treinamento, Usuario, Curso, Video, Comentario];
+const models = [Treinamento, Usuario, Curso, Video, Comentario, TreinamentoUsuario];
 
 const connection = new Sequelize(databaseConfig);
 
