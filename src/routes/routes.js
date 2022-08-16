@@ -10,7 +10,7 @@ import usuarioController from '../controllers/UsuarioController';
 import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
-import comentarioController  from '../controllers/ComentarioController';
+import comentarioController from '../controllers/ComentarioController';
 
 const router = new Router();
 
