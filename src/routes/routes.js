@@ -12,6 +12,7 @@ import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
 import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
+import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 
 const router = new Router();
 
@@ -56,11 +57,18 @@ router.post('/comentarios/', comentarioController.store);
 router.put('/comentarios/:id', comentarioController.update);
 router.delete('/comentarios/:id', comentarioController.destroy);
 
-// TREINAMENTOS
+// TREINAMENTOS-USUARIOS
 router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
-router.get('/treinamentos/:id', treinamentoUsuarioController.show);
+router.get('/treinamentos-usuarios/:id', treinamentoUsuarioController.show);
 router.post('/treinamentos-usuarios/', treinamentoUsuarioController.store);
-router.put('/treinamentos/:id', treinamentoUsuarioController.update);
-router.delete('/treinamentos/:id', treinamentoUsuarioController.destroy);
+router.put('/treinamentos-usuarios/:id', treinamentoUsuarioController.update);
+router.delete('/treinamentos-usuarios/:id', treinamentoUsuarioController.destroy);
+
+// TREINAMENTOS-CURSOS
+router.get('/treinamentos-cursos/', treinamentoCursoController.index);
+router.get('/treinamentos-cursos/:id', treinamentoCursoController.show);
+router.post('/treinamentos-cursos/', treinamentoCursoController.store);
+router.put('/treinamentos-cursos/:id', treinamentoCursoController.update);
+router.delete('/treinamentos-cursos/:id', treinamentoCursoController.destroy);
 
 export default router;
