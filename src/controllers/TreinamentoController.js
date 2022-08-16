@@ -101,5 +101,5 @@ module.exports = {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
-}
+  },
+};
