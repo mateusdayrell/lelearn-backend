@@ -10,6 +10,7 @@ import usuarioController from '../controllers/UsuarioController';
 import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
+import comentarioController  from '../controllers/ComentarioController';
 
 const router = new Router();
 
@@ -46,5 +47,12 @@ router.get('/treinamentos/:id', treinamentoController.show);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);
 router.delete('/treinamentos/:id', treinamentoController.destroy);
+
+// COMENTARIOS
+router.get('/comentarios/', comentarioController.index);
+router.get('/comentarios/:id', comentarioController.show);
+router.post('/comentarios/', comentarioController.store);
+router.put('/comentarios/:id', comentarioController.update);
+router.delete('/comentarios/:id', comentarioController.destroy);
 
 export default router;
