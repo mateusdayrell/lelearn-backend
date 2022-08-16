@@ -1,12 +1,12 @@
-import Sequelize, { Model } from 'sequelize';
-import bcryptjs from 'bcryptjs';
+const { Model, DataTypes } = require('sequelize');
+const bcryptjs = require('bcryptjs');
 
 class Usuario extends Model {
   static init(sequelize) { // init Usuario
     super.init(
       { // init Model
         cpf: {
-          type: Sequelize.STRING(11),
+          type: DataTypes.STRING,
           primaryKey: true,
           validate: {
             len: {
@@ -16,7 +16,7 @@ class Usuario extends Model {
           },
         },
         nome: {
-          type: Sequelize.STRING(40),
+          type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
           validate: {
@@ -27,7 +27,7 @@ class Usuario extends Model {
           },
         },
         telefone: {
-          type: Sequelize.STRING(11),
+          type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
           validate: {
@@ -38,7 +38,7 @@ class Usuario extends Model {
           },
         },
         email: {
-          type: Sequelize.STRING(50),
+          type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
           unique: true,
@@ -49,11 +49,11 @@ class Usuario extends Model {
           },
         },
         senha: { // senha COM hash
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           defaultValue: '',
         },
         password: { // senha SEM hash
-          type: Sequelize.VIRTUAL,
+          type: DataTypes.VIRTUAL,
           defaultValue: '',
           validate: {
             len: {
@@ -63,12 +63,12 @@ class Usuario extends Model {
           },
         },
         tipo: {
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
           defaultValue: '',
           allowNull: false,
         },
         data_nasc: {
-          type: Sequelize.DATE,
+          type: DataTypes.DATE,
           allowNull: true,
         },
       },
@@ -93,10 +93,10 @@ class Usuario extends Model {
   static associate(models) {
     this.belongsToMany(models.Treinamento, {
       through: 'treinamentos_usuarios',
-      as: 'treinamentos',
+      as: 'treinamento',
       foreignKey: 'cpf',
     });
   }
 }
 
-export default Usuario;
+module.exports = Usuario;

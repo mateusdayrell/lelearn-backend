@@ -1,11 +1,11 @@
-import Sequelize, { Model } from 'sequelize';
+const { Model, DataTypes  } = require('sequelize');
 
 class Comentario extends Model {
-  static init(sequelize) { // init Usuario
+  static init(sequelize) { // init Comentario
     super.init(
       { // init Model
         cod_comentario: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           primaryKey: true,
           validate: {
             len: {
@@ -15,7 +15,7 @@ class Comentario extends Model {
           },
         },
         cpf: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           validate: {
             len: {
@@ -25,7 +25,7 @@ class Comentario extends Model {
           },
         },
         cod_video: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           validate: {
             len: {
@@ -35,8 +35,8 @@ class Comentario extends Model {
           },
         },
         comentario: {
-          type: Sequelize.STRING,
-          allowNull: false,
+          type: DataTypes.STRING,
+          allowNull: true,
           validate: {
             len: {
               args: [4, 4],
@@ -60,4 +60,4 @@ class Comentario extends Model {
   }
 }
 
-export default Comentario;
+module.exports = Comentario;

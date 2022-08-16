@@ -1,11 +1,11 @@
-import Sequelize, { Model } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
 class Treinamento extends Model {
   static init(sequelize) { // init Treinamento
     super.init(
       { // init Model
         cod_treinamento: {
-          type: Sequelize.STRING(4),
+          type: DataTypes.STRING,
           primaryKey: true,
           validate: {
             len: {
@@ -15,7 +15,7 @@ class Treinamento extends Model {
           },
         },
         nome_treinamento: {
-          type: Sequelize.STRING(30),
+          type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
           validate: {
@@ -26,7 +26,7 @@ class Treinamento extends Model {
           },
         },
         desc_treinamento: {
-          type: Sequelize.STRING(150),
+          type: DataTypes.STRING,
           allowNull: true,
           validate: {
             len: {
@@ -46,7 +46,7 @@ class Treinamento extends Model {
   static associate(models) {
     this.belongsToMany(models.Usuario, {
       through: 'treinamentos_usuarios',
-      as: 'usuarios',
+      as: 'usuario',
       foreignKey: 'cod_treinamento',
     });
 
@@ -58,4 +58,4 @@ class Treinamento extends Model {
   }
 }
 
-export default Treinamento;
+module.exports = Treinamento;

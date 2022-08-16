@@ -1,11 +1,11 @@
-import Sequelize, { Model } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
 class Video extends Model {
   static init(sequelize) { // init Usuario
     super.init(
       { // init Model
         cod_video: {
-          type: Sequelize.STRING(4),
+          type: DataTypes.STRING,
           primaryKey: true,
           allowNull: false,
           validate: {
@@ -16,7 +16,7 @@ class Video extends Model {
           },
         },
         cod_curso: {
-          type: Sequelize.STRING(4),
+          type: DataTypes.STRING,
           allowNull: true,
           validate: {
             len: {
@@ -26,7 +26,7 @@ class Video extends Model {
           },
         },
         titulo_video: {
-          type: Sequelize.STRING(40),
+          type: DataTypes.STRING,
           allowNull: false,
           validate: {
             len: {
@@ -36,7 +36,7 @@ class Video extends Model {
           },
         },
         desc_video: {
-          type: Sequelize.STRING(150),
+          type: DataTypes.STRING,
           allowNull: true,
           validate: {
             len: {
@@ -46,7 +46,7 @@ class Video extends Model {
           },
         },
         link: {
-          type: Sequelize.STRING(150),
+          type: DataTypes.STRING,
           allowNull: false,
           validate: {
             len: {
@@ -69,4 +69,4 @@ class Video extends Model {
   }
 }
 
-export default Video;
+module.exports = Video;
