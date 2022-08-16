@@ -50,7 +50,7 @@ class Treinamento extends Model {
       foreignKey: 'cod_treinamento',
     });
 
-    this.belongsToMany(models.Cursos, {
+    this.belongsToMany(models.Curso, {
       through: 'treinamentos_cursos',
       as: 'cursos',
       foreignKey: 'cod_treinamento',
