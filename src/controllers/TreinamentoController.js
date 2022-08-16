@@ -1,6 +1,6 @@
-import Treinamento from '../models/Treinamento';
+const Treinamento = require('../models/Treinamento');
 
-class TreinamentoController {
+module.exports = {
   async index(req, res) {
     try {
       const treinamentos = await Treinamento.findAll();
@@ -9,26 +9,31 @@ class TreinamentoController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
       const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do treinamento não enviado.'],
+        });
+      }
+
       const treinamento = await Treinamento.findByPk(id);
+
+      if (!treinamento) {
+        return res.status(400).json({
+          erros: ['Treinamento não existe.'],
+        });
+      }
 
       return res.json(treinamento);
     } catch (error) {
       return res.json(null);
     }
-  }
-
-  // async create(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
+  },
 
   async store(req, res) {
     try {
@@ -40,15 +45,7 @@ class TreinamentoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
-
-  // async edit(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
+  },
 
   async update(req, res) {
     try {
@@ -76,7 +73,7 @@ class TreinamentoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async destroy(req, res) {
     try {
@@ -106,5 +103,3 @@ class TreinamentoController {
     }
   }
 }
-
-export default new TreinamentoController();
