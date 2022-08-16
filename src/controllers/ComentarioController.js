@@ -32,7 +32,7 @@ module.exports = {
 
   async store(req, res) {
     try {
-      const erros = await validateBody(req.body);
+      const erros = await validateBody(req.body, res);
 
       if (erros.length > 0) {
         return res.status(400).json({
@@ -68,7 +68,7 @@ module.exports = {
         });
       }
 
-      const erros = await validateBody(req.body);
+      const erros = await validateBody(req.body, res);
 
       if (erros.length > 0) {
         return res.status(400).json({
@@ -115,7 +115,7 @@ module.exports = {
   },
 };
 
-const validateBody = async (body) => {
+const validateBody = async (body, res) => {
   try {
     const erros = [];
     const { cpf, cod_video, comentario } = body;
@@ -149,6 +149,9 @@ const validateBody = async (body) => {
     return erros;
   } catch (error) {
     console.log(error);
-    return error;
+
+    return res.status(400).json({
+      erros: error,
+    });
   }
 };
