@@ -32,7 +32,7 @@ module.exports = {
 
   async store(req, res) {
     try {
-      const erros = await validateBody(req.body, res);
+      const erros = await validateBody(req.body, res); // eslint-disable-line
 
       if (erros.length > 0) {
         return res.status(400).json({
@@ -68,7 +68,7 @@ module.exports = {
         });
       }
 
-      const erros = await validateBody(req.body, res);
+      const erros = await validateBody(req.body, res); // eslint-disable-line
 
       if (erros.length > 0) {
         return res.status(400).json({
@@ -118,13 +118,13 @@ module.exports = {
 const validateBody = async (body, res) => {
   try {
     const erros = [];
-    const { cpf, cod_video, comentario } = body;
+    const { cpf, cod_video, comentario } = body; // eslint-disable-line
 
     if (!cpf) {
       erros.push('CPF não enviado.');
     }
 
-    if (!cod_video) {
+    if (!cod_video) { // eslint-disable-line
       erros.push('Código do vídeo não enviado.');
     }
 
