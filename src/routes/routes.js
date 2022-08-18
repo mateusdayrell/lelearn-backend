@@ -59,16 +59,16 @@ router.delete('/comentarios/:id', comentarioController.destroy);
 
 // TREINAMENTOS-USUARIOS
 router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
-router.get('/treinamentos-usuarios/:id', treinamentoUsuarioController.show);
+router.get('/treinamentos-usuarios/:cod_treinamento/:cpf', treinamentoUsuarioController.show);
 router.post('/treinamentos-usuarios/', treinamentoUsuarioController.store);
-router.put('/treinamentos-usuarios/:id', treinamentoUsuarioController.update);
-router.delete('/treinamentos-usuarios/:id', treinamentoUsuarioController.destroy);
+router.put('/treinamentos-usuarios/:cod_treinamento/:cpf', treinamentoUsuarioController.update);
+router.delete('/treinamentos-usuarios/:cod_treinamento/:cpf', treinamentoUsuarioController.destroy);
 
 // TREINAMENTOS-CURSOS
 router.get('/treinamentos-cursos/', treinamentoCursoController.index);
-router.get('/treinamentos-cursos/:id', treinamentoCursoController.show);
+router.get('/treinamentos-cursos/:cod_treinamento/:cod_curso', treinamentoCursoController.show);
 router.post('/treinamentos-cursos/', treinamentoCursoController.store);
-router.put('/treinamentos-cursos/:id', treinamentoCursoController.update);
-router.delete('/treinamentos-cursos/:id', treinamentoCursoController.destroy);
+router.put('/treinamentos-cursos/:cod_treinamento/:cod_curso', treinamentoCursoController.update);
+router.delete('/treinamentos-cursos/:cod_treinamento/:cod_curso', treinamentoCursoController.destroy);
 
 export default router;
