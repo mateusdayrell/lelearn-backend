@@ -1,11 +1,11 @@
-import Sequelize, { Model } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
 class Curso extends Model {
   static init(sequelize) { // init Usuario
     super.init(
       { // init Model
         cod_curso: {
-          type: Sequelize.STRING(4),
+          type: DataTypes.STRING(4),
           primaryKey: true,
           validate: {
             len: {
@@ -15,7 +15,7 @@ class Curso extends Model {
           },
         },
         nome_curso: {
-          type: Sequelize.STRING(40),
+          type: DataTypes.STRING(40),
           allowNull: false,
           validate: {
             len: {
@@ -25,7 +25,7 @@ class Curso extends Model {
           },
         },
         desc_curso: {
-          type: Sequelize.STRING(150),
+          type: DataTypes.STRING(150),
           allowNull: true,
           validate: {
             len: {
@@ -52,4 +52,4 @@ class Curso extends Model {
   }
 }
 
-export default Curso;
+module.exports = Curso;
