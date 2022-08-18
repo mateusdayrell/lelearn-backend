@@ -5,7 +5,6 @@ import loginRequired from '../middlewares/loginRequired';
 
 // CONTROLLERS
 import tokenController from '../controllers/TokenController';
-import homeController from '../controllers/HomeController';
 import usuarioController from '../controllers/UsuarioController';
 import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
@@ -15,9 +14,6 @@ import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioContr
 import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 
 const router = new Router();
-
-// HOME
-router.get('/home', homeController.index);
 
 // TOKEN
 router.post('/tokens', tokenController.store);
