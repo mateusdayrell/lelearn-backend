@@ -1,8 +1,8 @@
-import TreinamentoCurso from '../models/TreinamentoCurso';
-import Treinamento from '../models/Treinamento';
-import Curso from '../models/Curso';
+const TreinamentoCurso = require('../models/TreinamentoCurso');
+const Treinamento = require('../models/Treinamento');
+const Curso = require('../models/Curso');
 
-class TreinamentoCursoController {
+module.exports = {
   async index(req, res) {
     try {
       const treinamentos = await TreinamentoCurso.findAll();
@@ -10,149 +10,164 @@ class TreinamentoCursoController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
-      const { id } = req.params;
+      const erros = validateParams(req.params)
 
-      if (!id) {
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      const treinamentoCurso = await TreinamentoCurso.findOne({ where:req.params})
+
+      if (!treinamentoCurso) {
         return res.status(400).json({
-          erros: ['Código do treinamento-curso não enviado.'],
+          erros: ['Treinamento-curso não existe.'],
         });
       }
 
-      const treinCurso = await TreinamentoCurso.findByPk(id);
-
-      return res.json(treinCurso);
+      return res.json(treinamentoCurso);
     } catch (error) {
-      return res.json(null);
+      return res.json(error);
     }
-  }
+  },
 
   async store(req, res) {
     try {
-      const { cod_treinamento, cod_curso } = req.body; // eslint-disable-line
+      const erros = await validateBody(req.body, res)
 
-      if (!cod_treinamento) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do treinamento não enviado.'],
-        });
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
       }
 
-      if (!cod_curso) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do curso não enviado.'],
-        });
-      }
+      const treinamentoCurso = await TreinamentoCurso.create(req.body);
 
-      const treinamento = await Treinamento.findByPk(cod_treinamento);
-
-      if (!treinamento) {
-        return res.status(400).json({
-          erros: ['Treinamento não existe.'],
-        });
-      }
-
-      const curso = await Curso.findByPk(cod_curso);
-      if (!curso) {
-        return res.status(400).json({
-          erros: ['Curso não existe.'],
-        });
-      }
-
-      const treinCurso = await TreinamentoCurso.create(req.body);
-
-      return res.json(treinCurso);
+      return res.json(treinamentoCurso);
     } catch (error) {
       return res.status(400).json({
-        erros: error,
+        erros: error
       });
     }
-  }
+  },
 
   async update(req, res) {
     try {
-      const { id } = req.params;
-      const { cod_treinamento, cod_curso } = req.body; // eslint-disable-line
+      let erros = []
+      erros = validateParams(req.params)
 
-      if (!id) {
-        return res.status(400).json({
-          erros: ['Código do treinamento-curso não enviado.'],
-        });
+      if(erros.length > 0) {
+        return res.status(400).json({ erros });
       }
 
-      const treinCurso = TreinamentoCurso.findByPk(id);
+      erros = validateBody(req.body, res, true)
 
-      if (!treinCurso) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Treinamento-curso não existe.'],
-        });
+      if(erros.length > 0) {
+        return res.status(400).json({ erros });
       }
 
-      if (!cod_treinamento) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do treinamento não enviado.'],
-        });
-      }
+      const treinamentoCurso = await TreinamentoCurso.findOne(req.params)
 
-      if (!cod_curso) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do curso não enviado.'],
-        });
-      }
-
-      const treinamento = await Treinamento.findByPk(cod_treinamento);
-      if (!treinamento) {
-        return res.status(400).json({
-          erros: ['Treinamento não existe.'],
-        });
-      }
-
-      const curso = await Curso.findByPk(cod_curso);
-      if (!curso) {
-        return res.status(400).json({
-          erros: ['Curso não existe.'],
-        });
-      }
-
-      const treinCursoEditado = await treinCurso.update(req.body);
-
-      return res.json(treinCursoEditado);
-    } catch (error) {
-      return res.status(400).json({
-        erros: error,
-      });
-    }
-  }
-
-  async destroy(req, res) {
-    try {
-      const { id } = req.params;
-
-      if (!id) {
-        return res.status(400).json({
-          erros: ['Código do treinamento-curso não enviado.'],
-        });
-      }
-
-      const treinCurso = TreinamentoCurso.findByPk(id);
-
-      if (!treinCurso) {
+      if (!treinamentoCurso) {
         return res.status(400).json({
           erros: ['Treinamento-curso não existe.'],
         });
       }
 
-      await treinCurso.destroy();
+      const [ editado ] = await TreinamentoCurso.update(req.body, {where : req.params})
 
-      return res.json(treinCurso); // também pode enviar null
+      if(editado === 0){
+        return res.status(400).json({
+          erros: ['Nenhum treinamento-curso editado.'],
+        });
+      }
+
+      const novoTreinamentoCurso = await TreinamentoCurso.findOne(req.body)
+
+      return res.json(novoTreinamentoCurso);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
+
+  async destroy(req, res) {
+    try {
+      const erros = validateParams(req.params)
+
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      const treinamentoCurso = await TreinamentoCurso.findOne(req.params)
+
+      if (!treinamentoCurso) {
+        return res.status(400).json({
+          erros: ['Treinamento-curso não existe.'],
+        });
+      }
+
+      await TreinamentoCurso.destroy({ where: req.params },);
+
+      return res.json(null);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error
+      });
+    }
+  },
+};
+
+const validateParams = (params) => {
+    const erros = [];
+
+    if (!params.cod_curso) {
+      erros.push('Código de curso do treinamento-curso não enviado.');
+    }
+    if (!params.cod_treinamento) {
+      erros.push('Código de treinamento do treinamento-curso não enviado.');
+    }
+
+    return erros;
 }
 
-export default new TreinamentoCursoController();
+const validateBody = async (body, res, update) => {
+  try {
+    const erros = [];
+
+    if (!body.cod_curso && !update) {
+      erros.push('Código do curso não enviado');
+    }
+    if (!body.cod_treinamento && !update) {
+      erros.push('Código do treinamento não enviado')
+    }
+
+    if(erros.length > 0) return erros
+
+    if(body.cod_curso){
+      const curso = await Curso.findByPk(body.cod_curso);
+      if (!curso) {
+        erros.push('Curso não existe.');
+      }
+    }
+
+    if(body.cod_treinamento){
+      const treinamento = await Treinamento.findByPk(body.cod_treinamento);
+      if (!treinamento) {
+        erros.push('Treinamento não existe.');
+      }
+    }
+
+    if(erros.length > 0) return erros
+
+    return erros;
+  } catch (error) {
+    console.log(error);
+
+    return res.status(400).json({
+      erros: error,
+    });
+  }
+}

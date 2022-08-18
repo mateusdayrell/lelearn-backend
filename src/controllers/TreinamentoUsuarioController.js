@@ -1,8 +1,8 @@
-import TreinamentoUsuario from '../models/TreinamentoUsuario';
-import Treinamento from '../models/Treinamento';
-import Usuario from '../models/Usuario';
+const TreinamentoUsuario = require('../models/TreinamentoUsuario');
+const Treinamento = require('../models/Treinamento');
+const Usuario = require('../models/Usuario');
 
-class TreinamentoUsuarioController {
+module.exports = {
   async index(req, res) {
     try {
       const treinamentos = await TreinamentoUsuario.findAll();
@@ -10,55 +10,36 @@ class TreinamentoUsuarioController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
-      const { id } = req.params;
+      const erros = validateParams(req.params)
 
-      if (!id) {
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      const treinamentoUsuario = await TreinamentoUsuario.findOne(req.params)
+
+      if (!treinamentoUsuario) {
         return res.status(400).json({
-          erros: ['Código do treinamento-usuário não enviado.'],
+          erros: ['Treinamento-usuário não existe.'],
         });
       }
 
-      const treinUsuario = await TreinamentoUsuario.findByPk(id);
-
-      return res.json(treinUsuario);
+      return res.json(treinamentoUsuario); // também pode enviar null
     } catch (error) {
-      return res.json(null);
+      return res.json(error);
     }
-  }
+  },
 
   async store(req, res) {
     try {
-      const { cod_treinamento, cpf } = req.body; // eslint-disable-line
+      const erros = await validateBody(req.body, res)
 
-      if (!cod_treinamento) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do treinamento não enviado.'],
-        });
-      }
-
-      if (!cpf) {
-        return res.status(400).json({
-          erros: ['CPF não enviado.'],
-        });
-      }
-
-      const treinamento = await Treinamento.findByPk(cod_treinamento);
-
-      if (!treinamento) {
-        return res.status(400).json({
-          erros: ['Treinamento não existe.'],
-        });
-      }
-
-      const usuario = await Usuario.findByPk(cpf);
-      if (!usuario) {
-        return res.status(400).json({
-          erros: ['Usuário não existe.'],
-        });
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
       }
 
       const treinUsuario = await TreinamentoUsuario.create(req.body);
@@ -66,93 +47,127 @@ class TreinamentoUsuarioController {
       return res.json(treinUsuario);
     } catch (error) {
       return res.status(400).json({
-        erros: error,
+        erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async update(req, res) {
     try {
-      const { id } = req.params;
-      const { cod_treinamento, cpf } = req.body; // eslint-disable-line
+      let erros = []
+      erros = validateParams(req.params)
 
-      if (!id) {
+      if(erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      erros = validateBody(req.body, res, true)
+
+      if(erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      const treinamentoUsuario = await TreinamentoUsuario.findOne(req.params)
+
+      if (!treinamentoUsuario) {
         return res.status(400).json({
-          erros: ['Código do treinamento-usuário não enviado.'],
+          erros: ['Treinamento-usuário não existe.'],
         });
       }
 
-      const treinUsuario = TreinamentoUsuario.findByPk(id);
+      const [ editado ] = await TreinamentoUsuario.update(req.body, {where : req.params})
 
-      if (!treinUsuario) { // eslint-disable-line
+      if(editado === 0){
         return res.status(400).json({
-          erros: ['Código do treinamento-usuário não enviado.'],
+          erros: ['Nenhum treinamento-usuário editado.'],
         });
       }
 
-      if (!cod_treinamento) { // eslint-disable-line
-        return res.status(400).json({
-          erros: ['Código do treinamento não enviado.'],
-        });
-      }
+      const novoTreinamentoUsuario = await TreinamentoUsuario.findOne(req.body)
 
-      if (!cpf) {
-        return res.status(400).json({
-          erros: ['CPF não enviado.'],
-        });
-      }
-
-      const treinamento = await Treinamento.findByPk(cod_treinamento);
-      if (!treinamento) {
-        return res.status(400).json({
-          erros: ['Treinamento não existe.'],
-        });
-      }
-
-      const usuario = await Usuario.findByPk(cpf);
-      if (!usuario) {
-        return res.status(400).json({
-          erros: ['Usuário não existe.'],
-        });
-      }
-
-      const treinUsuarioEditado = await treinUsuario.update(req.body);
-
-      return res.json(treinUsuarioEditado);
-    } catch (error) {
-      return res.status(400).json({
-        erros: error,
-      });
-    }
-  }
-
-  async destroy(req, res) {
-    try {
-      const { id } = req.params;
-
-      if (!id) {
-        return res.status(400).json({
-          erros: ['Código do treinamento-usuário não enviado.'],
-        });
-      }
-
-      const treinUsuario = TreinamentoUsuario.findByPk(id);
-
-      if (!treinUsuario) {
-        return res.status(400).json({
-          erros: ['Treinamento-usuario não existe.'],
-        });
-      }
-
-      await treinUsuario.destroy();
-
-      return res.json(treinUsuario); // também pode enviar null
+      return res.json(novoTreinamentoUsuario);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
+
+  async destroy(req, res) {
+    try {
+      const erros = validateParams(req.params)
+
+      if (erros.length > 0) {
+        return res.status(400).json({ erros });
+      }
+
+      const treinamentoUsuario = await TreinamentoUsuario.findOne(req.params)
+
+      if (!treinamentoUsuario) {
+        return res.status(400).json({
+          erros: ['Treinamento-usuário não existe.'],
+        });
+      }
+
+      await TreinamentoUsuario.destroy({ where: req.params },);
+
+      return res.json(null);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error
+      });
+    }
+  },
+};
+
+const validateParams = (params) => {
+    const erros = [];
+
+    if (!params.cpf) {
+      erros.push('CPF do treinamento-usuário não enviado.');
+    }
+    if (!params.cod_treinamento) {
+      erros.push('Código de treinamento do treinamento-usuário não enviado.');
+    }
+
+    return erros;
 }
 
-export default new TreinamentoUsuarioController();
+const validateBody = async (body, res, update) => {
+  try {
+    const erros = [];
+
+    if (!body.cpf && !update) {
+      erros.push('CPF do usuário não enviado');
+    }
+    if (!body.cod_treinamento && !update) {
+      erros.push('Código do treinamento não enviado')
+    }
+
+    if(erros.length > 0) return erros
+
+    if(body.cpf){
+      const usuario = await Usuario.findByPk(body.cpf);
+      if (!usuario) {
+        erros.push('Usuário não existe.');
+      }
+    }
+
+    if(body.cod_treinamento){
+      const treinamento = await Treinamento.findByPk(body.cod_treinamento);
+      if (!treinamento) {
+        erros.push('Treinamento não existe.');
+      }
+    }
+
+    if(erros.length > 0) return erros
+
+    return erros;
+  } catch (error) {
+    console.log(error);
+
+    return res.status(400).json({
+      erros: error,
+    });
+  }
+}
