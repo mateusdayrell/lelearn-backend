@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import routes from './src/routes/routes';
-import './src/database/connection'; // connect to database;
+import routes from './routes/routes';
+import './database/connection'; // connect to database;
 
 dotenv.config();
 
