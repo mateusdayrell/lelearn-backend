@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
+import delay from 'express-delay';
 import routes from './routes/routes';
 import './database/connection'; // connect to database;
 
@@ -33,6 +34,7 @@ class App {
     this.app.use(helmet());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(delay(2000));
   }
 
   routes() {
