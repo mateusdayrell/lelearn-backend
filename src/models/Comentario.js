@@ -34,16 +34,26 @@ class Comentario extends Model {
             },
           },
         },
-        comentario: {
+        comentario_pai: {
           type: DataTypes.STRING,
           allowNull: true,
           validate: {
             len: {
               args: [4, 4],
-              msg: 'O comentário vídeo deve ter 4 caracteres.',
+              msg: 'O código do comentário pai deve ter 4 caracteres.',
             },
           },
         },
+        texto: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          validate: {
+            len: {
+              args: [0, 150],
+              msg: 'O comentário deve ter no máximo 150 caracteres.',
+            },
+          },
+        }
       },
       {
         sequelize,

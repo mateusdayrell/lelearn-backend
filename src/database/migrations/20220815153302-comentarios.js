@@ -22,13 +22,17 @@ module.exports = {
           key: 'cod_video',
         },
       },
-      comentario: {
+      comentario_pai: {
         type: Sequelize.STRING(4),
         allowNull: true,
         references: {
           model: 'comentarios',
           key: 'cod_comentario',
         },
+      },
+      texto: {
+        type: Sequelize.STRING(150),
+        allowNull: false,
       },
       created_at: {
         type: Sequelize.DATE,
