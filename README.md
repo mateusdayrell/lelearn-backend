@@ -16,6 +16,11 @@ cd llrn-backend
 npm install
 ```
 
+### Copy .env.example to .env
+```
+cp .env.example .env
+```
+
 ### Run the migrations
 ```
 npx sequelize db:migrate
