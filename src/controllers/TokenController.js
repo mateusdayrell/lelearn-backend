@@ -25,12 +25,17 @@ class TokenController {
       });
     }
 
-    const { cpf, tipo } = usuario;
+    const { cpf, tipo, nome } = usuario;
     const token = jwt.sign({ cpf, email, tipo }, process.env.TOKEN_SECRET, {
       expiresIn: process.env.TOKEN_EXPIRATION,
     });
 
-    return res.json({ token, usuario: { cpf, email, nome: usuario.nome } });
+    return res.json({
+      token,
+      usuario: {
+        cpf, email, tipo, nome,
+      },
+    });
   }
 }
 
