@@ -1,4 +1,5 @@
 import Usuario from '../models/Usuario';
+import { Op } from "sequelize";
 
 class UsuarioController {
   async index(req, res) {
@@ -13,6 +14,7 @@ class UsuarioController {
 
   async show(req, res) {
     try {
+
       const { id } = req.params;
       const usuario = await Usuario.findByPk(id);
 
@@ -21,14 +23,6 @@ class UsuarioController {
       return res.json(null);
     }
   }
-
-  // async create(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async store(req, res) {
     try {
@@ -41,14 +35,6 @@ class UsuarioController {
       });
     }
   }
-
-  // async edit(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async update(req, res) {
     try {
@@ -99,6 +85,33 @@ class UsuarioController {
       await usuario.destroy();
 
       return res.json(usuario); // também pode enviar null
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  }
+
+  async search(req, res){
+    try {
+      const { search } = req.params;
+      const urlParams = new URLSearchParams(search)
+
+      const cpf = urlParams.get('cpf')
+      const nome = urlParams.get('nome')
+      const tipo = urlParams.get('tipo')
+
+      const usuarios = await Usuario.findAll({
+        where: {
+          [Op.and]: [
+            {cpf: { [Op.substring]: cpf}},
+            {nome: { [Op.substring]: nome}},
+            {tipo: { [Op.substring]: tipo}}
+          ]
+        }
+      })
+
+      return res.json(usuarios);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),

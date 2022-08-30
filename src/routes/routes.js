@@ -21,6 +21,7 @@ router.post('/tokens', tokenController.store);
 // USUÁRIOS
 router.get('/usuarios/', loginRequired, usuarioController.index);
 router.get('/usuarios/:id', usuarioController.show);
+router.get('/usuarios/search/:search', usuarioController.search);
 router.post('/usuarios/', usuarioController.store);
 router.put('/usuarios/:id', usuarioController.update);
 router.delete('/usuarios/:id', usuarioController.destroy);
