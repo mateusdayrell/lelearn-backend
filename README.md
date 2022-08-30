@@ -1,5 +1,10 @@
 # Llrn-backend
 
+## Technologies used <br>
+Click to access the documentation: [NodeJs](https://nodejs.org/en/), [Express](https://expressjs.com/pt-br/), [Sequelize](https://sequelize.org/docs/v6/).
+
+## Project setup <br>
+
 ### Clone the repository
 ```
 git clone https://github.com/mateusdayrell/llrn-backend.git
