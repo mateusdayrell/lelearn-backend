@@ -66,7 +66,6 @@ class Comentario extends Model {
   static associate(models) {
     this.belongsTo(models.Usuario, { foreignKey: 'cpf' });
     this.belongsTo(models.Video, { foreignKey: 'cod_video' });
-    this.belongsTo(models.Comentario, { foreignKey: 'comentario' });
   }
 }
 
