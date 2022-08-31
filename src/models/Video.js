@@ -65,7 +65,8 @@ class Video extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Curso, { foreignKey: 'cod_curso' });
+    this.belongsTo(models.Curso, { as: 'curso', foreignKey: 'cod_curso' });
+    this.hasMany(models.Comentario, { as: 'comentarios', foreignKey: 'cod_video' });
   }
 }
 
