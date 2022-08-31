@@ -1,4 +1,5 @@
 import Video from '../models/Video';
+import Curso from '../models/Curso';
 
 class VideoController {
   async index(req, res) {
@@ -14,21 +15,15 @@ class VideoController {
   async show(req, res) {
     try {
       const { id } = req.params;
-      const video = await Video.findByPk(id);
+      const video = await Video.findByPk(id, {
+        include: [{model: Curso, as: 'curso', include: 'videos'}, 'comentarios']
+      });
 
       return res.json(video);
     } catch (error) {
-      return res.json(null);
+      return null
     }
   }
-
-  // async create(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async store(req, res) {
     try {
@@ -41,14 +36,6 @@ class VideoController {
       });
     }
   }
-
-  // async edit(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async update(req, res) {
     try {

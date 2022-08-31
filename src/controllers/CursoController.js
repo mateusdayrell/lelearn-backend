@@ -14,21 +14,15 @@ class CursoController {
   async show(req, res) {
     try {
       const { id } = req.params;
-      const curso = await Curso.findByPk(id);
+      const curso = await Curso.findByPk(id, {
+        include: 'videos'
+      });
 
       return res.json(curso);
     } catch (error) {
       return res.json(null);
     }
   }
-
-  // async create(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async store(req, res) {
     try {
@@ -41,14 +35,6 @@ class CursoController {
       });
     }
   }
-
-  // async edit(req, res) {
-  //   try {
-
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async update(req, res) {
     try {
