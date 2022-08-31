@@ -49,6 +49,7 @@ class Curso extends Model {
       as: 'treinamentos',
       foreignKey: 'cod_curso',
     });
+    this.hasMany(models.Video, { as: 'videos', foreignKey: 'cod_curso' });
   }
 }
 
