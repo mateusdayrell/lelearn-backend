@@ -36,6 +36,7 @@ router.delete('/cursos/:id', cursoController.destroy);
 // VIDEOS
 router.get('/videos/', videoController.index);
 router.get('/videos/:id', videoController.show);
+router.get('/videos/search/:search', videoController.search);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
 router.delete('/videos/:id', videoController.destroy);

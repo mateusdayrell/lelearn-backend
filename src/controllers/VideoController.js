@@ -1,10 +1,13 @@
 import Video from '../models/Video';
 import Curso from '../models/Curso';
+import { Op } from "sequelize";
 
 class VideoController {
   async index(req, res) {
     try {
-      const videos = await Video.findAll();
+      const videos = await Video.findAll({
+        include: [{model: Curso, as: 'curso'}]
+      });
 
       return res.json(videos);
     } catch (error) {
@@ -90,6 +93,32 @@ class VideoController {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
+    }
+  }
+
+  async search(req, res){
+    try {
+      const { search } = req.params;
+      const urlParams = new URLSearchParams(search)
+
+      const titulo_video = urlParams.get('titulo_video')
+      const cod_curso = urlParams.get('cod_curso')
+      console.log(titulo_video)
+      const videos = await Video.findAll({
+        where: {
+          [Op.and]: [
+            {titulo_video: { [Op.substring]: titulo_video}},
+            {cod_curso: { [Op.substring]: cod_curso}},
+          ]
+        }
+      }, {
+        include: [{model: Curso, as: 'curso', include: 'videos'}, 'comentarios']
+      })
+
+      return res.json(videos);
+    } catch (error) {
+      console.log(error)
+      return error
     }
   }
 }
