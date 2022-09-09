@@ -18,6 +18,7 @@ module.exports = {
           key: 'cpf',
         },
         primaryKey: true,
+        onDelete: 'CASCADE'
       },
       created_at: {
         type: Sequelize.DATE,

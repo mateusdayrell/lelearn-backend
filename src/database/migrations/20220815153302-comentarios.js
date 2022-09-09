@@ -13,6 +13,7 @@ module.exports = {
           model: 'usuarios',
           key: 'cpf',
         },
+        onDelete: 'CASCADE'
       },
       cod_video: {
         type: Sequelize.STRING(4),
