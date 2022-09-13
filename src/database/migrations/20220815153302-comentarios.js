@@ -13,7 +13,8 @@ module.exports = {
           model: 'usuarios',
           key: 'cpf',
         },
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       cod_video: {
         type: Sequelize.STRING(4),
@@ -22,6 +23,8 @@ module.exports = {
           model: 'videos',
           key: 'cod_video',
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       comentario_pai: {
         type: Sequelize.STRING(4),
