@@ -35,7 +35,12 @@ class VideoController {
       return res.json(novoVideo);
     } catch (error) {
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error.errors.map((err) => {
+          if (err.message === 'PRIMARY must be unique') {
+            return 'Código do vídeo já cadastrado!';
+          }
+          return err.message
+        }),
       });
     }
   }
@@ -63,7 +68,12 @@ class VideoController {
       return res.json(videoEditado);
     } catch (error) {
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error.errors.map((err) => {
+          if (err.message === 'PRIMARY must be unique') {
+            return toast.error('Código do vídeo já cadastrado');
+          }
+          return err.message
+        }),
       });
     }
   }
