@@ -35,6 +35,7 @@ class Usuario extends Model {
               args: [10, 11],
               msg: 'O telefone deve ter entre 10 e 11 caracteres.',
             },
+            isInt: { args: true, msg: "Telefone inválido" },
           },
         },
         email: {
