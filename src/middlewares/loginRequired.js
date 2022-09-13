@@ -34,7 +34,7 @@ export default (req, res, next) => {
     return next();
   } catch (error) {
     return res.status(401).json({
-      erros: ['Token expirado ou inválido.'],
+      erros: ['Token expirado ou inválido, faça login para continuar.'],
     });
   }
 };
