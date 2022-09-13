@@ -44,3 +44,4 @@ npm run dev
 ## Recomendation
 To start using the aplication it's recomended to use ***Insomnia***, you can download it on this ***[link](https://insomnia.rest/download)***.<br>
 After downloading, you can import the file [Insomnia_llrn-backend_2022-08-27.json](https://github.com/mateusdayrell/llrn-backend/blob/main/Insomnia_llrn-backend_2022-08-27.json) to your Insominia app as explained in this ***[tutorial](https://docs.insomnia.rest/insomnia/import-export-data)***, and start using the application.
+teste
