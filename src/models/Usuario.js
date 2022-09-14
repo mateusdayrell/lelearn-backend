@@ -72,8 +72,24 @@ class Usuario extends Model {
           type: DataTypes.DATE,
           allowNull: true,
         },
+        password_reset_token: {
+          type: DataTypes.STRING,
+          defaultValue: '',
+        },
+        password_reset_expires: {
+          type: DataTypes.DATE,
+          defaultValue: '',
+        },
       },
       {
+        defaultScope: {
+          attributes: { exclude: ['password_reset_token', 'password_reset_expires'] },
+        },
+        scopes: {
+          resetPassword: {
+            attributes: { include: ['password_reset_token', 'password_reset_expires'] },
+          },
+        },
         sequelize,
       },
     );
