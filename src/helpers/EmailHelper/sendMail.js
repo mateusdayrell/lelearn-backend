@@ -1,4 +1,5 @@
-import nodemailer from "nodemailer"
+import nodemailer from 'nodemailer';
+
 require('dotenv').config();
 
 const handleSendMail = async (mailTo, mailSubject, mailBody) => {
@@ -13,31 +14,31 @@ const handleSendMail = async (mailTo, mailSubject, mailBody) => {
     //   }
     // })
 
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
+      // eslint-disable-next-line radix
       port: parseInt(process.env.MAIL_PORT),
       secure: process.env.MAIL_SECURE_EMAIL,
       requireTLS: process.env.MAIL_TLS_EMAIL,
       auth: {
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_SUPER_PASSWORD,
-      }
+      },
     });
 
-    let { accepted } = await transporter.sendMail({
-      from: "LeLearn " + process.env.MAIL_USERNAME,
-      to: 'mateusdayrell7@gmail.com',
+    const { accepted } = await transporter.sendMail({
+      from: `LeLearn ${process.env.MAIL_USERNAME}`,
+      to: mailTo,
       subject: mailSubject,
       html: mailBody,
-    })
+    });
 
-    if (accepted.length > 0) return accepted
-    else return false
+    if (accepted.length > 0) return accepted;
+    return false;
   } catch (error) {
-    console.log(error)
-    return false
+    console.log(error);
+    return false;
   }
-}
+};
 
-
-module.exports = handleSendMail
+module.exports = handleSendMail;

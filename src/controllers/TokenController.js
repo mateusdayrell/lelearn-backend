@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import Usuario from '../models/Usuario';
-import sendMail from '../helpers/EmailHelper/sendMail'
-import { forgotPasswordTemplate } from '../helpers/EmailHelper/templates'
+import sendMail from '../helpers/EmailHelper/sendMail';
+import { forgotPasswordTemplate } from '../helpers/EmailHelper/templates';
 
 require('dotenv').config();
 
@@ -46,8 +46,8 @@ class TokenController {
   async resetPassword(req, res) {
     try {
       // Conferir e validar dados
-      const {cpf} = req.params
-      const {email} = req.body
+      const { cpf } = req.params;
+      const { email } = req.body;
 
       if (!cpf) {
         return res.status(400).json({
@@ -63,7 +63,7 @@ class TokenController {
         });
       }
 
-      if(!email || email !== usuario.email){
+      if (!email || email !== usuario.email) {
         return res.status(400).json({
           erros: ['Email incorreto.'],
         });
@@ -71,35 +71,34 @@ class TokenController {
       // Conferir e validar dados
 
       // Criar e atualizar token
-      const token = crypto.randomBytes(20).toString('hex')
+      const token = crypto.randomBytes(20).toString('hex');
 
       const tokenExpiration = new Date(); // tempo de expiração do token de 1h
-      tokenExpiration.setHours(tokenExpiration.getHours() + 1)
+      tokenExpiration.setHours(tokenExpiration.getHours() + 1);
 
-      const usuarioEditado = await usuario.update({ //atualizar token
+      await usuario.update({ // atualizar token
         password_reset_token: token,
-        password_reset_expires: tokenExpiration
+        password_reset_expires: tokenExpiration,
       });
       // Criar e atualizar token
 
       const template = await forgotPasswordTemplate(token); // montar template de email
-      const enviado = await sendMail(email, 'Recuperação de senha', template); //enviar email
+      const enviado = await sendMail(email, 'Recuperação de senha', template); // enviar email
 
-      if(!enviado){
+      if (!enviado) {
         return res.status(400).json({
           erros: ['Falha ao enviar email'],
         });
       }
 
-      return res.json('Email enviado com sucesso!')
+      return res.json('Email enviado com sucesso!');
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return res.status(400).json({
         erros: ['Erro, email não enviado!'],
       });
     }
   }
-
 }
 
 export default new TokenController();
