@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import Usuario from '../models/Usuario';
-// import transporter from '../helpers/EmailHelper/Transporter'
+import sendMail from '../helpers/EmailHelper/sendMail'
+import { forgotPasswordTemplate } from '../helpers/EmailHelper/templates'
 
-import nodemailer from "nodemailer"
 require('dotenv').config();
 
 class TokenController {
@@ -45,8 +45,8 @@ class TokenController {
 
   async resetPassword(req, res) {
     try {
+      // Conferir e validar dados
       const {cpf} = req.params
-
       const {email} = req.body
 
       if (!cpf) {
@@ -63,61 +63,40 @@ class TokenController {
         });
       }
 
-      if(!email || usuario.email !== email){
+      if(!email || email !== usuario.email){
         return res.status(400).json({
           erros: ['Email incorreto.'],
         });
       }
+      // Conferir e validar dados
 
+      // Criar e atualizar token
       const token = crypto.randomBytes(20).toString('hex')
 
-      const tokenExpiration = new Date();
+      const tokenExpiration = new Date(); // tempo de expiração do token de 1h
       tokenExpiration.setHours(tokenExpiration.getHours() + 1)
 
-      const usuarioEditado = await usuario.update({
+      const usuarioEditado = await usuario.update({ //atualizar token
         password_reset_token: token,
         password_reset_expires: tokenExpiration
       });
+      // Criar e atualizar token
 
-      let transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,
-        port: parseInt(process.env.MAIL_PORT),
-        secure: false, // process.env.SECURE_EMAIL === 'true' ? true : false, // true for 465, false for other ports
-        auth: {
-          user: process.env.MAIL_USERNAME,
-          pass: process.env.MAIL_PASSWORD,
-        },
-        tls: {
-          rejectUnauthorized: false, // process.env.TLS_EMAIL === 'true' ? true : false,
-        },
-      })
+      const template = await forgotPasswordTemplate(token); // montar template de email
+      const enviado = await sendMail(email, 'Recuperação de senha', template); //enviar email
 
-      let { accepted } = await transporter.sendMail({
-        from: "LeLern " + process.env.MAIL_USERNAME,
-        to: 'mateusdayrell7@gmail.com',
-        subject: "Hello ✔", // Subject line
-        text: "Hello world ✔", // plaintext body
-        html: "<b>Hello world ✔</b>" // html body
-      });
+      if(!enviado){
+        return res.status(400).json({
+          erros: ['Falha ao enviar email'],
+        });
+      }
 
-      if (accepted.length > 0) return res.status(200).send({sucess: 'AEEEE'})
-      else return res.status(400).send({error: 'ERROU'})
-
-      // transporter.sendMail({
-      //   from: "LeLern " + process.env.MAIL_USERNAME,
-      //   to: 'mateusdayrell7@gmail.com',
-      //   subject: "Hello ✔", // Subject line
-      //   text: "Hello world ✔", // plaintext body
-      //   html: "<b>Hello world ✔</b>" // html body
-      // }, err => {
-      //   console.log(err)
-      //   if (err) return res.status(400).send({error: 'ERROU'})
-
-      //   return res.status(200).send({sucess: 'AEEEE'})
-      // })
+      return res.json('Email enviado com sucesso!')
     } catch (error) {
       console.log(error)
-      return false
+      return res.status(400).json({
+        erros: ['Erro, email não enviado!'],
+      });
     }
   }
 
