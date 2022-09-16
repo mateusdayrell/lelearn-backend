@@ -16,8 +16,7 @@ class UsuarioController {
     try {
 
       const { id } = req.params;
-      const usuario = await Usuario.findByPk(id);
-
+      const usuario = await Usuario.scope('resetPassword').findByPk(id);
       return res.json(usuario);
     } catch (error) {
       return res.json(null);
