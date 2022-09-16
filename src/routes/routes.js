@@ -17,7 +17,7 @@ const router = new Router();
 
 // TOKEN
 router.post('/tokens', tokenController.store);
-router.post('/reset-password/:cpf', tokenController.resetPassword);
+router.post('/send-reset-password/:cpf', tokenController.resetPassword);
 
 // USUÁRIOS
 router.get('/usuarios/', usuarioController.index);
