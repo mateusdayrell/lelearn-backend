@@ -65,13 +65,13 @@ class TokenController {
 
       if (!email || email !== usuario.email) {
         return res.status(400).json({
-          erros: ['Email incorreto.'],
+          erros: ['Email inválido!'],
         });
       }
       // Conferir e validar dados
 
       // Criar e atualizar token
-      const token = crypto.randomBytes(20).toString('hex');
+      const token = crypto.randomBytes(5).toString('hex');
 
       const tokenExpiration = new Date(); // tempo de expiração do token de 1h
       tokenExpiration.setHours(tokenExpiration.getHours() + 1);
@@ -84,6 +84,7 @@ class TokenController {
 
       const template = await forgotPasswordTemplate(token); // montar template de email
       const enviado = await sendMail(email, 'Recuperação de senha', template); // enviar email
+      // const enviado = true // <--  USAR PARA TESTES !!!
 
       if (!enviado) {
         return res.status(400).json({
@@ -91,11 +92,11 @@ class TokenController {
         });
       }
 
-      return res.json('Email enviado com sucesso!');
+      return res.json(true);
     } catch (error) {
       console.log(error);
       return res.status(400).json({
-        erros: ['Erro, email não enviado!'],
+        erros: ['Email não enviado!'],
       });
     }
   }
