@@ -46,6 +46,7 @@ router.delete('/videos/:id', videoController.destroy);
 // TREINAMENTOS
 router.get('/treinamentos/', treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
+router.get('/treinamentos/search/:search', treinamentoController.search);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);
 router.delete('/treinamentos/:id', treinamentoController.destroy);
