@@ -30,6 +30,7 @@ router.delete('/usuarios/:id', usuarioController.destroy);
 // CURSOS
 router.get('/cursos/', cursoController.index);
 router.get('/cursos/:id', cursoController.show);
+router.get('/cursos/search/:search', cursoController.search);
 router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
 router.delete('/cursos/:id', cursoController.destroy);

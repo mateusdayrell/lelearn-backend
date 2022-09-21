@@ -1,9 +1,12 @@
 import Curso from '../models/Curso';
+import { Op } from "sequelize";
 
 class CursoController {
   async index(req, res) {
     try {
-      const cursos = await Curso.findAll();
+      const cursos = await Curso.findAll({
+        include: ['videos']
+      });
 
       return res.json(cursos);
     } catch (error) {
@@ -89,6 +92,27 @@ class CursoController {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
+    }
+  }
+
+  async search(req, res){
+    try {
+      const { search } = req.params;
+      const urlParams = new URLSearchParams(search)
+
+      const nome_curso = urlParams.get('nome_curso')
+
+      const cursos = await Curso.findAll({
+        where: {
+            nome_curso: { [Op.substring]: nome_curso}
+        },
+        include: ['videos']
+      })
+
+      return res.json(cursos);
+    } catch (error) {
+      console.log(error)
+      return error
     }
   }
 }
