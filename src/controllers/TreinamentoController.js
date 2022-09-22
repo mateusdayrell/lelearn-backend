@@ -7,7 +7,7 @@ module.exports = {
   async index(req, res) {
     try {
       const treinamentos = await Treinamento.findAll({
-        include: ['usuarios', 'cursos']
+        include: [{model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome']}, 'cursos'],
       });
 
       return res.json(treinamentos);
@@ -55,6 +55,9 @@ module.exports = {
   async update(req, res) {
     try {
       const { id } = req.params;
+      const { usuarios, cursos } = req.body
+      const usuariosArr = []
+      const cursosArr = []
 
       if (!id) {
         return res.status(400).json({
@@ -62,13 +65,30 @@ module.exports = {
         });
       }
 
-      const treinamento = await Treinamento.findByPk(id);
+      const treinamento = await Treinamento.findByPk(id, {
+        include: [{model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome']}, 'cursos'],
+      });
 
       if (!treinamento) {
         return res.status(400).json({
           erros: ['Treinamento não existe.'],
         });
       }
+
+      if(usuarios) {
+        usuarios.forEach(u => {
+          usuariosArr.push(u.cpf)
+        })
+        await treinamento.setUsuarios(usuariosArr)
+      }
+
+      if(cursos) {
+        cursos.forEach(c => {
+          cursosArr.push(c.cod_curso)
+        })
+        await treinamento.setCursos(cursosArr)
+      }
+
 
       const treinamentoEditado = await treinamento.update(req.body);
 
@@ -140,8 +160,6 @@ module.exports = {
           }
         ]
       })
-
-      console.log(treinamentos)
 
       return res.json(treinamentos);
     } catch (error) {
