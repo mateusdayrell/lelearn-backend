@@ -1,5 +1,5 @@
 const Treinamento = require('../models/Treinamento');
-const Curso = require('../models/Treinamento');
+const Curso = require('../models/Curso');
 
 const validateBody = async (body, res, update) => {
   try {
