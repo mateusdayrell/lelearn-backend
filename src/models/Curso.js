@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const { nanoid } = require('nanoid');
 
 class Curso extends Model {
   static init(sequelize) { // init Usuario
@@ -6,6 +7,7 @@ class Curso extends Model {
       { // init Model
         cod_curso: {
           type: DataTypes.STRING(4),
+          defaultValue: nanoid(4),
           primaryKey: true,
           validate: {
             len: {

@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const { nanoid } = require('nanoid');
 
 class Comentario extends Model {
   static init(sequelize) { // init Comentario
@@ -6,6 +7,7 @@ class Comentario extends Model {
       { // init Model
         cod_comentario: {
           type: DataTypes.STRING,
+          defaultValue: nanoid(4),
           primaryKey: true,
           validate: {
             len: {
@@ -53,7 +55,7 @@ class Comentario extends Model {
               msg: 'O comentário deve ter no máximo 150 caracteres.',
             },
           },
-        }
+        },
       },
       {
         sequelize,

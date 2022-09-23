@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const { nanoid } = require('nanoid');
 
 class Video extends Model {
   static init(sequelize) { // init Usuario
@@ -6,6 +7,7 @@ class Video extends Model {
       { // init Model
         cod_video: {
           type: DataTypes.STRING,
+          defaultValue: nanoid(4),
           primaryKey: true,
           allowNull: false,
           validate: {
