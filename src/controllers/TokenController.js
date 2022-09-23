@@ -1,12 +1,11 @@
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import Usuario from '../models/Usuario';
-import sendMail from '../helpers/EmailHelper/sendMail';
-import { forgotPasswordTemplate } from '../helpers/EmailHelper/templates';
-
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const Usuario = require('../models/Usuario');
+const sendMail = require('../helpers/EmailHelper/sendMail');
+const { forgotPasswordTemplate } = require('../helpers/EmailHelper/templates');
 require('dotenv').config();
 
-class TokenController {
+module.exports = {
   async store(req, res) {
     const { email = '', senha = '' } = req.body;
 
@@ -41,7 +40,7 @@ class TokenController {
         cpf, email, tipo, nome,
       },
     });
-  }
+  },
 
   async resetPassword(req, res) {
     try {
@@ -99,7 +98,5 @@ class TokenController {
         erros: ['Email não enviado!'],
       });
     }
-  }
-}
-
-export default new TokenController();
+  },
+};

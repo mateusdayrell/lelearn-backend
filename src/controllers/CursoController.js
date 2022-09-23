@@ -1,31 +1,31 @@
-import Curso from '../models/Curso';
-import { Op } from "sequelize";
+const { Op } = require('sequelize');
+const Curso = require('../models/Curso');
 
-class CursoController {
+module.exports = {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
-        include: ['videos']
+        include: ['videos'],
       });
 
       return res.json(cursos);
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
       const { id } = req.params;
       const curso = await Curso.findByPk(id, {
-        include: 'videos'
+        include: 'videos',
       });
 
       return res.json(curso);
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async store(req, res) {
     try {
@@ -37,7 +37,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async update(req, res) {
     try {
@@ -65,7 +65,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async destroy(req, res) {
     try {
@@ -93,28 +93,26 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
-  async search(req, res){
+  async search(req, res) {
     try {
       const { search } = req.params;
-      const urlParams = new URLSearchParams(search)
+      const urlParams = new URLSearchParams(search);
 
-      const nome_curso = urlParams.get('nome_curso')
+      const nome_curso = urlParams.get('nome_curso');
 
       const cursos = await Curso.findAll({
         where: {
-            nome_curso: { [Op.substring]: nome_curso}
+          nome_curso: { [Op.substring]: nome_curso },
         },
-        include: ['videos']
-      })
+        include: ['videos'],
+      });
 
       return res.json(cursos);
     } catch (error) {
-      console.log(error)
-      return error
+      console.log(error);
+      return error;
     }
-  }
-}
-
-export default new CursoController();
+  },
+};

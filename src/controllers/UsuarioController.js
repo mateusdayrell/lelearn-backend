@@ -1,7 +1,7 @@
-import Usuario from '../models/Usuario';
-import { Op } from "sequelize";
+const { Op } = require('sequelize');
+const Usuario = require('../models/Usuario');
 
-class UsuarioController {
+module.exports = {
   async index(req, res) {
     try {
       const usuarios = await Usuario.findAll();
@@ -10,18 +10,17 @@ class UsuarioController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
-
       const { id } = req.params;
       const usuario = await Usuario.scope('resetPassword').findByPk(id);
       return res.json(usuario);
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async store(req, res) {
     try {
@@ -30,10 +29,15 @@ class UsuarioController {
       return res.json(novoUsuario);
     } catch (error) {
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error.errors.map((err) => {
+          if (err.message === 'PRIMARY must be unique') {
+            return 'Código do vídeo já cadastrado!';
+          }
+          return err.message;
+        }),
       });
     }
-  }
+  },
 
   async update(req, res) {
     try {
@@ -61,7 +65,7 @@ class UsuarioController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async destroy(req, res) {
     try {
@@ -89,26 +93,26 @@ class UsuarioController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
-  async search(req, res){
+  async search(req, res) {
     try {
       const { search } = req.params;
-      const urlParams = new URLSearchParams(search)
+      const urlParams = new URLSearchParams(search);
 
-      const cpf = urlParams.get('cpf')
-      const nome = urlParams.get('nome')
-      const tipo = urlParams.get('tipo')
+      const cpf = urlParams.get('cpf');
+      const nome = urlParams.get('nome');
+      const tipo = urlParams.get('tipo');
 
       const usuarios = await Usuario.findAll({
         where: {
           [Op.and]: [
-            {cpf: { [Op.substring]: cpf}},
-            {nome: { [Op.substring]: nome}},
-            {tipo: { [Op.substring]: tipo}}
-          ]
-        }
-      })
+            { cpf: { [Op.substring]: cpf } },
+            { nome: { [Op.substring]: nome } },
+            { tipo: { [Op.substring]: tipo } },
+          ],
+        },
+      });
 
       return res.json(usuarios);
     } catch (error) {
@@ -116,7 +120,5 @@ class UsuarioController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
-}
-
-export default new UsuarioController();
+  },
+};
