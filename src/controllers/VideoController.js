@@ -30,9 +30,7 @@ module.exports = {
 
   async store(req, res) {
     try {
-      console.log(req.body);
       const novoVideo = await Video.create(req.body);
-      console.log(novoVideo);
       return res.json(novoVideo);
     } catch (error) {
       return res.status(400).json({
