@@ -7,7 +7,10 @@ class Curso extends Model {
       { // init Model
         cod_curso: {
           type: DataTypes.STRING(4),
-          defaultValue: nanoid(4),
+          defaultValue: () => {
+            const randomId = nanoid(4);
+            return randomId;
+          },
           primaryKey: true,
           validate: {
             len: {

@@ -7,7 +7,10 @@ class Comentario extends Model {
       { // init Model
         cod_comentario: {
           type: DataTypes.STRING,
-          defaultValue: nanoid(4),
+          defaultValue: () => {
+            const randomId = nanoid(4);
+            return randomId;
+          },
           primaryKey: true,
           validate: {
             len: {

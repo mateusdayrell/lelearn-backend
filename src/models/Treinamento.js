@@ -7,7 +7,10 @@ class Treinamento extends Model {
       { // init Model
         cod_treinamento: {
           type: DataTypes.STRING,
-          defaultValue: nanoid(4),
+          defaultValue: () => {
+            const randomId = nanoid(4);
+            return randomId;
+          },
           primaryKey: true,
           validate: {
             len: {

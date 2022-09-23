@@ -7,7 +7,10 @@ class Video extends Model {
       { // init Model
         cod_video: {
           type: DataTypes.STRING,
-          defaultValue: nanoid(4),
+          defaultValue: () => {
+            const randomId = nanoid(4);
+            return randomId;
+          },
           primaryKey: true,
           allowNull: false,
           validate: {
