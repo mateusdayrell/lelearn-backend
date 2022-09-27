@@ -118,6 +118,8 @@ module.exports = {
         });
       }
 
+      await treinamento.setCursos(null);
+      await treinamento.setUsuarios(null);
       await treinamento.destroy();
 
       return res.json(treinamento); // também pode enviar null

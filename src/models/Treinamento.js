@@ -6,7 +6,7 @@ class Treinamento extends Model {
     super.init(
       { // init Model
         cod_treinamento: {
-          type: DataTypes.STRING,
+          type: DataTypes.STRING(4),
           defaultValue: () => {
             const randomId = nanoid(4);
             return randomId;

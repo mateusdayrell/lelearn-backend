@@ -9,6 +9,8 @@ module.exports = {
           key: 'cod_treinamento',
         },
         primaryKey: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       cpf: {
         type: Sequelize.STRING(11),
@@ -18,7 +20,8 @@ module.exports = {
           key: 'cpf',
         },
         primaryKey: true,
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       created_at: {
         type: Sequelize.DATE,
