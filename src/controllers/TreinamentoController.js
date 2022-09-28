@@ -9,6 +9,7 @@ module.exports = {
     try {
       const treinamentos = await Treinamento.findAll({
         include: [{ model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome'] }, 'cursos'],
+        order: ['nome_treinamento'],
       });
 
       return res.json(treinamentos);
@@ -138,6 +139,7 @@ module.exports = {
       const nome_treinamento = urlParams.get('nome_treinamento');
       const cpf = urlParams.get('cpf');
       const cod_curso = urlParams.get('cod_curso');
+      const order = urlParams.get('order').split(' ');
 
       const treinamentos = await Treinamento.findAll({
         where: {
@@ -161,12 +163,14 @@ module.exports = {
             },
           },
         ],
+        order: [order],
       });
 
       return res.json(treinamentos);
     } catch (error) {
-      console.log(error);
-      return error;
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   },
 };
