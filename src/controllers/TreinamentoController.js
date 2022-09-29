@@ -139,7 +139,6 @@ module.exports = {
       const nome_treinamento = urlParams.get('nome_treinamento');
       const cpf = urlParams.get('cpf');
       const cod_curso = urlParams.get('cod_curso');
-      const order = urlParams.get('order').split(' ');
 
       const treinamentos = await Treinamento.findAll({
         where: {
@@ -163,7 +162,7 @@ module.exports = {
             },
           },
         ],
-        order: [order],
+        order: ['nome_treinamento'],
       });
 
       return res.json(treinamentos);
