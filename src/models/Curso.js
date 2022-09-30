@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const { nanoid } = require('nanoid');
+require('dotenv').config();
 
 class Curso extends Model {
   static init(sequelize) { // init Usuario
@@ -39,12 +40,25 @@ class Curso extends Model {
             },
           },
         },
+        nome_arquivo: {
+          type: DataTypes.STRING,
+          defaultValue: '',
+          allowNull: true,
+        },
+        arquivo_url: {
+          type: DataTypes.VIRTUAL,
+          // eslint-disable-next-line consistent-return
+          get() {
+            if (this.getDataValue('nome_arquivo')) {
+              return `${process.env.FILE_URL}/images/${this.getDataValue('nome_arquivo')}`;
+            }
+          },
+        },
       },
       {
         sequelize,
       },
     );
-
     return this;
   }
 
