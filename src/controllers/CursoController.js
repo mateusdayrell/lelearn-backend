@@ -1,7 +1,10 @@
-const { Op } = require('sequelize');
-const Curso = require('../models/Curso');
+import { Op } from 'sequelize';
 
-module.exports = {
+import Curso from '../models/Curso';
+import upload from '../services/multer';
+import { apagarFotoCurso } from '../helpers/CursoHelper';
+
+class CursoController {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
@@ -12,7 +15,7 @@ module.exports = {
     } catch (error) {
       return res.json(null);
     }
-  },
+  }
 
   async show(req, res) {
     try {
@@ -25,19 +28,30 @@ module.exports = {
     } catch (error) {
       return res.json(null);
     }
-  },
+  }
 
   async store(req, res) {
     try {
-      const novoCurso = await Curso.create(req.body);
+      return upload(req, res, async (error) => {
+        if (error) {
+          return res.status(400).json({
+            errors: [error.code],
+          });
+        }
+        const { filename } = req.file;
 
-      return res.json(novoCurso);
+        const objCurso = { ...req.body, nome_arquivo: filename };
+
+        const novoCurso = await Curso.create(objCurso);
+        return res.json(novoCurso);
+      });
     } catch (error) {
+      console.log(error);
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
     }
-  },
+  }
 
   async update(req, res) {
     try {
@@ -57,15 +71,33 @@ module.exports = {
         });
       }
 
-      const cursoEditado = await curso.update(req.body);
+      return upload(req, res, async (error) => {
+        if (error) {
+          return res.status(400).json({
+            errors: [error.code],
+          });
+        }
 
-      return res.json(cursoEditado);
+        const { filename } = req.file;
+        const objCurso = { ...req.body, nome_arquivo: filename };
+
+        if (curso.nome_arquivo) {
+          if (!apagarFotoCurso(curso.nome_arquivo)) {
+            return res.status(400).json({
+              errors: ['Erro ao excluir imagem'],
+            });
+          }
+        }
+
+        const cursoEditado = await curso.update(objCurso);
+        return res.json(cursoEditado);
+      });
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
     }
-  },
+  }
 
   async destroy(req, res) {
     try {
@@ -85,6 +117,14 @@ module.exports = {
         });
       }
 
+      if (curso.nome_arquivo) {
+        if (!apagarFotoCurso(curso.nome_arquivo)) {
+          return res.status(400).json({
+            errors: ['Erro ao excluir imagem'],
+          });
+        }
+      }
+
       await curso.destroy();
 
       return res.json(curso); // também pode enviar null
@@ -93,7 +133,7 @@ module.exports = {
         erros: error.errors.map((err) => err.message),
       });
     }
-  },
+  }
 
   async search(req, res) {
     try {
@@ -114,5 +154,7 @@ module.exports = {
       console.log(error);
       return error;
     }
-  },
-};
+  }
+}
+
+export default new CursoController();
