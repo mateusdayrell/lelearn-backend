@@ -2,7 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
-import delay from 'express-delay';
+// import delay from 'express-delay';
+import { resolve } from 'path';
 import routes from './routes/routes';
 import './database/connection'; // connect to database;
 
@@ -31,9 +32,10 @@ class App {
 
   middlewares() {
     this.app.use(cors(corsOptions));
-    this.app.use(helmet());
+    this.app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(express.static(resolve(__dirname, '..', 'uploads')));
     // this.app.use(delay(2000));
   }
 
