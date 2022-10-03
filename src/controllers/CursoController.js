@@ -35,7 +35,7 @@ class CursoController {
       return upload(req, res, async (error) => {
         if (error) {
           return res.status(400).json({
-            errors: [error.code],
+            erros: [error.code],
           });
         }
         const { filename } = req.file;
@@ -74,7 +74,7 @@ class CursoController {
       return upload(req, res, async (error) => {
         if (error) {
           return res.status(400).json({
-            errors: [error.code],
+            erros: [error.code],
           });
         }
 
@@ -84,7 +84,7 @@ class CursoController {
         if (curso.nome_arquivo) {
           if (!apagarFotoCurso(curso.nome_arquivo)) {
             return res.status(400).json({
-              errors: ['Erro ao excluir imagem'],
+              erros: ['Erro ao excluir imagem'],
             });
           }
         }
@@ -120,7 +120,7 @@ class CursoController {
       if (curso.nome_arquivo) {
         if (!apagarFotoCurso(curso.nome_arquivo)) {
           return res.status(400).json({
-            errors: ['Erro ao excluir imagem'],
+            erros: ['Erro ao excluir imagem'],
           });
         }
       }
