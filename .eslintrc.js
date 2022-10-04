@@ -15,5 +15,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'import-first': 'off',
     camelcase: 'off',
+    'no-plusplus': 'off',
+    'no-await-in-loop': 'off',
   },
 };
