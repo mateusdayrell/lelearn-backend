@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const bcryptjs = require('bcryptjs');
+const { staticCpfs } = require('../../helpers/UsuarioHelper');
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -6,7 +8,7 @@ module.exports = {
       'usuarios',
       [
         {
-          cpf: '00000000001',
+          cpf: staticCpfs[0],
           nome: 'Administrador',
           telefone: '38999999999',
           email: 'adm@email.com',
@@ -17,7 +19,7 @@ module.exports = {
           updated_at: new Date(),
         },
         {
-          cpf: '00000000002',
+          cpf: staticCpfs[1],
           nome: 'Mateus Dayrell',
           telefone: '38988888888',
           email: 'dayrell@email.com',
@@ -28,7 +30,7 @@ module.exports = {
           updated_at: new Date(),
         },
         {
-          cpf: '00000000003',
+          cpf: staticCpfs[2],
           nome: 'Marcos Gabriel',
           telefone: '38988888888',
           email: 'marcos@email.com',
@@ -39,7 +41,7 @@ module.exports = {
           updated_at: new Date(),
         },
         {
-          cpf: '00000000004',
+          cpf: staticCpfs[3],
           nome: 'Italo',
           telefone: '38988888888',
           email: 'italo@email.com',
@@ -50,7 +52,7 @@ module.exports = {
           updated_at: new Date(),
         },
         {
-          cpf: '00000000005',
+          cpf: staticCpfs[4],
           nome: 'Matheus de Souza',
           telefone: '38988888888',
           email: 'matheus@email.com',
@@ -61,7 +63,7 @@ module.exports = {
           updated_at: new Date(),
         },
         {
-          cpf: '00000000006',
+          cpf: staticCpfs[5],
           nome: 'Leonardo Chaves',
           telefone: '38988888888',
           email: 'leo@email.com',
@@ -78,6 +80,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return  queryInterface.bulkDelete('usuarios', null, {});
+    return queryInterface.bulkDelete('usuarios', null, {});
   },
 };
