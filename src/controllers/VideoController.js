@@ -7,6 +7,7 @@ module.exports = {
     try {
       const videos = await Video.findAll({
         include: [{ model: Curso, as: 'curso' }],
+        order: ['titulo_video'],
       });
 
       return res.json(videos);
@@ -117,6 +118,7 @@ module.exports = {
         },
       }, {
         include: [{ model: Curso, as: 'curso', include: 'videos' }, 'comentarios'],
+        order: ['titulo_video'],
       });
 
       return res.json(videos);

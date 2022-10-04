@@ -9,6 +9,7 @@ class CursoController {
     try {
       const cursos = await Curso.findAll({
         include: ['videos'],
+        order: ['nome_curso'],
       });
 
       return res.json(cursos);
@@ -147,6 +148,7 @@ class CursoController {
           nome_curso: { [Op.substring]: nome_curso },
         },
         include: ['videos'],
+        order: ['nome_curso'],
       });
 
       return res.json(cursos);

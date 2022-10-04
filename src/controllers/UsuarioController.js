@@ -4,7 +4,9 @@ const Usuario = require('../models/Usuario');
 module.exports = {
   async index(req, res) {
     try {
-      const usuarios = await Usuario.findAll();
+      const usuarios = await Usuario.findAll({
+        order: ['nome'],
+      });
 
       return res.json(usuarios);
     } catch (error) {
@@ -112,6 +114,7 @@ module.exports = {
             { tipo: { [Op.substring]: tipo } },
           ],
         },
+        order: ['nome'],
       });
 
       return res.json(usuarios);
