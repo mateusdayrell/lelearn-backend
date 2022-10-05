@@ -68,10 +68,6 @@ class Usuario extends Model {
           defaultValue: '',
           allowNull: false,
         },
-        data_nasc: {
-          type: DataTypes.DATE,
-          allowNull: true,
-        },
         password_reset_token: {
           type: DataTypes.STRING,
           defaultValue: '',

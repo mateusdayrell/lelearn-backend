@@ -27,10 +27,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      data_nasc: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
       password_reset_token: {
         type: Sequelize.STRING,
         allowNull: true,
