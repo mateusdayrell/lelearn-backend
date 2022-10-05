@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 const bcryptjs = require('bcryptjs');
+const { faker } = require('@faker-js/faker/locale/pt_BR');
+const { cpf } = require('cpf-cnpj-validator');
 const { staticCpfs } = require('../../helpers/UsuarioHelper');
 
 module.exports = {
@@ -71,6 +73,26 @@ module.exports = {
 
       {},
     );
+
+    for (let i = 0; i < 20; i++) {
+      await queryInterface.bulkInsert(
+        'usuarios',
+        [
+          {
+            cpf: cpf.generate(),
+            nome: faker.name.fullName(),
+            telefone: faker.phone.number('###########'),
+            email: faker.internet.email(),
+            senha: await bcryptjs.hash('12345678', 8),
+            tipo: faker.helpers.arrayElement(['0', '1']),
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
+
+        {},
+      );
+    }
   },
 
   async down(queryInterface, Sequelize) {

@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+const { faker } = require('@faker-js/faker/locale/pt_BR');
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
@@ -42,6 +45,23 @@ module.exports = {
 
       {},
     );
+
+    for (let i = 10; i < 30; i++) {
+      await queryInterface.bulkInsert(
+        'treinamentos',
+        [
+          {
+            cod_treinamento: `00${i}`,
+            nome_treinamento: faker.music.songName(),
+            desc_treinamento: faker.commerce.productDescription(),
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
+
+        {},
+      );
+    }
   },
 
   async down(queryInterface, Sequelize) {
