@@ -15,7 +15,7 @@ module.exports = {
         allowNull: true,
       },
       nome_arquivo: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(23),
         allowNull: true,
       },
       created_at: {

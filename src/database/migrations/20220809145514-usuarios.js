@@ -20,7 +20,7 @@ module.exports = {
         unique: true,
       },
       senha: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(60),
         allowNull: false,
       },
       tipo: {
@@ -28,7 +28,7 @@ module.exports = {
         allowNull: false,
       },
       password_reset_token: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(10),
         allowNull: true,
       },
       password_reset_expires: {
