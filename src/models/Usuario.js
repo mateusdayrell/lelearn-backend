@@ -109,7 +109,7 @@ class Usuario extends Model {
       as: 'treinamento',
       foreignKey: 'cpf',
     });
-    this.hasMany(models.Video, {
+    this.belongsToMany(models.Video, {
       through: 'usuarios_videos',
       as: 'videos',
       foreignKey: 'cpf',
