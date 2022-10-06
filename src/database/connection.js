@@ -7,9 +7,11 @@ import Video from '../models/Video';
 import Comentario from '../models/Comentario';
 import TreinamentoUsuario from '../models/TreinamentoUsuario';
 import TreinamentoCurso from '../models/TreinamentoCurso';
+import UsuarioVideo from '../models/UsuarioVideo';
 
 const models = [
   Treinamento, Usuario, Curso, Video, Comentario, TreinamentoUsuario, TreinamentoCurso,
+  UsuarioVideo,
 ];
 
 const connection = new Sequelize(databaseConfig);
