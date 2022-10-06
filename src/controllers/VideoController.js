@@ -109,7 +109,7 @@ module.exports = {
 
       const titulo_video = urlParams.get('titulo_video');
       const cod_curso = urlParams.get('cod_curso');
-      console.log(titulo_video);
+
       const videos = await Video.findAll({
         where: {
           [Op.and]: [
@@ -117,8 +117,7 @@ module.exports = {
             { cod_curso: { [Op.substring]: cod_curso } },
           ],
         },
-      }, {
-        include: [{ model: Curso, as: 'curso', include: 'videos' }, 'comentarios'],
+        include: [{ model: Curso, as: 'curso' }],
         order: ['titulo_video'],
       });
 
