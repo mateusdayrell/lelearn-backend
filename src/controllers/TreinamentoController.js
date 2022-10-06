@@ -9,7 +9,7 @@ module.exports = {
     try {
       const treinamentos = await Treinamento.findAll({
         include: [{ model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome'] }, 'cursos'],
-        order: ['nome_treinamento'],
+        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
       });
 
       return res.json(treinamentos);
@@ -162,7 +162,7 @@ module.exports = {
             },
           },
         ],
-        order: ['nome_treinamento'],
+        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
       });
 
       return res.json(treinamentos);
