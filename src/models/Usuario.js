@@ -109,6 +109,11 @@ class Usuario extends Model {
       as: 'treinamento',
       foreignKey: 'cpf',
     });
+    this.hasMany(models.Video, {
+      through: 'usuarios_videos',
+      as: 'videos',
+      foreignKey: 'cpf',
+    });
   }
 }
 

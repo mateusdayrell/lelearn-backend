@@ -21,6 +21,7 @@ module.exports = {
       const { id } = req.params;
       const video = await Video.findByPk(id, {
         include: [{ model: Curso, as: 'curso', include: 'videos' }, 'comentarios'],
+        order: [['comentarios', 'created_at', 'DESC']],
       });
 
       return res.json(video);
