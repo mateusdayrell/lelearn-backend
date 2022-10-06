@@ -19,8 +19,8 @@ const handleSendMail = async (mailTo, mailSubject, mailBody) => {
       host: process.env.MAIL_HOST,
       // eslint-disable-next-line radix
       port: parseInt(process.env.MAIL_PORT),
-      secure: process.env.MAIL_SECURE_EMAIL,
-      requireTLS: process.env.MAIL_TLS_EMAIL,
+      // secure: process.env.MAIL_SECURE_EMAIL, // comentar em caso de erros
+      // requireTLS: process.env.MAIL_TLS_EMAIL, // comentar em caso de erros
       auth: {
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_SUPER_PASSWORD,
