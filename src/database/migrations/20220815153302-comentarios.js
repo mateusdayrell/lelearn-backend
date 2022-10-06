@@ -14,7 +14,7 @@ module.exports = {
           key: 'cpf',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       cod_video: {
         type: Sequelize.STRING(4),
@@ -24,7 +24,7 @@ module.exports = {
           key: 'cod_video',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       comentario_pai: {
         type: Sequelize.STRING(4),
@@ -33,6 +33,8 @@ module.exports = {
           model: 'comentarios',
           key: 'cod_comentario',
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       texto: {
         type: Sequelize.STRING(150),
