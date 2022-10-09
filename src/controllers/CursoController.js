@@ -38,9 +38,12 @@ class CursoController {
             erros: [error.code],
           });
         }
-        const { filename } = req.file;
 
-        const objCurso = { ...req.body, nome_arquivo: filename };
+        const objCurso = {... req.body}
+
+        if(req.file){
+          const { filename } = req.file;
+        }
 
         const novoCurso = await Curso.create(objCurso);
         return res.json(novoCurso);
