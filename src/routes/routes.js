@@ -26,6 +26,8 @@ router.get('/usuarios/search/:search', usuarioController.search);
 router.post('/usuarios/', usuarioController.store);
 router.put('/usuarios/:id', usuarioController.update);
 router.delete('/usuarios/:id', usuarioController.destroy);
+router.get('/usuarios-videos/:cpf', usuarioController.getVideos);
+router.put('/usuarios-videos/:cpf/:codVideo', usuarioController.updateVideo);
 
 // CURSOS
 router.get('/cursos/', cursoController.index);

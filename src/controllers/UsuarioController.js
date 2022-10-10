@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const Usuario = require('../models/Usuario');
+const Video = require('../models/Video');
 
 module.exports = {
   async index(req, res) {
@@ -119,6 +120,70 @@ module.exports = {
 
       return res.json(usuarios);
     } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async getVideos(req, res) {
+    try {
+      const { cpf } = req.params;
+
+      if (!cpf) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      const usuario = await Usuario.findByPk(cpf, {
+        include: [{
+          model: Video,
+          as: 'videos',
+          through: { attributes: [] },
+        }],
+      });
+
+      if (!usuario) {
+        return res.status(400).json({
+          erros: ['Usuário não existe.'],
+        });
+      }
+
+      return res.json(usuario.videos);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async updateVideo(req, res) {
+    try {
+      const { cpf, codVideo } = req.params;
+
+      if (!cpf) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      const usuario = await Usuario.findByPk(cpf);
+
+      if (!usuario) {
+        return res.status(400).json({
+          erros: ['Usuário não existe.'],
+        });
+      }
+
+      if (await usuario.hasVideo(codVideo)) await usuario.removeVideo(codVideo);
+      else await usuario.addVideo(codVideo);
+
+      const usuarioVideos = await usuario.getVideos();
+
+      return res.json(usuarioVideos);
+    } catch (error) {
+      console.log(error);
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
