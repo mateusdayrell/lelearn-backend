@@ -39,11 +39,11 @@ class CursoController {
           });
         }
 
-        const objCurso = {... req.body}
+        const objCurso = { ...req.body };
 
-        if(req.file){
+        if (req.file) {
           const { filename } = req.file;
-          objCurso.nome_arquivo = filename
+          objCurso.nome_arquivo = filename;
         }
 
         const novoCurso = await Curso.create(objCurso);
@@ -77,16 +77,22 @@ class CursoController {
 
       return upload(req, res, async (error) => {
         if (error) {
+          if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+              erros: ['O arquivo deve ter no máximo 500kb!'],
+            });
+          }
+
           return res.status(400).json({
             erros: [error.code],
           });
         }
 
-        const objCurso = {... req.body}
+        const objCurso = { ...req.body };
 
-        if(req.file){
+        if (req.file) {
           const { filename } = req.file;
-          objCurso.nome_arquivo = filename
+          objCurso.nome_arquivo = filename;
         }
 
         if (curso.nome_arquivo) {
