@@ -38,9 +38,13 @@ class CursoController {
             erros: [error.code],
           });
         }
-        const { filename } = req.file;
 
-        const objCurso = { ...req.body, nome_arquivo: filename };
+        const objCurso = {... req.body}
+
+        if(req.file){
+          const { filename } = req.file;
+          objCurso.nome_arquivo = filename
+        }
 
         const novoCurso = await Curso.create(objCurso);
         return res.json(novoCurso);
@@ -78,8 +82,12 @@ class CursoController {
           });
         }
 
-        const { filename } = req.file;
-        const objCurso = { ...req.body, nome_arquivo: filename };
+        const objCurso = {... req.body}
+
+        if(req.file){
+          const { filename } = req.file;
+          objCurso.nome_arquivo = filename
+        }
 
         if (curso.nome_arquivo) {
           if (!apagarFotoCurso(curso.nome_arquivo)) {
