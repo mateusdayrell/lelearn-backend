@@ -27,7 +27,7 @@ class UsuarioVideo extends Model {
       },
       {
         sequelize,
-        tableName: 'usuarios_cursos',
+        tableName: 'usuarios_videos',
       },
     );
 
