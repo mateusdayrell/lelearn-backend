@@ -5,7 +5,7 @@ const usuarioHelper = require('../../helpers/UsuarioHelper');
 module.exports = {
   async up(queryInterface, Sequelize) {
     for (let c = 10; c < 21; c++) { // comentários
-      for (let v = 10; v < 61; v++) { // videos
+      for (let v = 10; v < 41; v++) { // videos
         const codComentario = `${c}${v}`;
         const codVideo = `00${v}`;
 

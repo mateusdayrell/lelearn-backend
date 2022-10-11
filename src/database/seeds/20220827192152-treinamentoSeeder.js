@@ -46,7 +46,7 @@ module.exports = {
       {},
     );
 
-    for (let i = 10; i < 30; i++) {
+    for (let i = 10; i < 20; i++) {
       await queryInterface.bulkInsert(
         'treinamentos',
         [
