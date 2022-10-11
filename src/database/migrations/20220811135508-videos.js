@@ -6,16 +6,6 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
       },
-      cod_curso: {
-        type: Sequelize.STRING(4),
-        allowNull: true,
-        references: {
-          model: 'cursos',
-          key: 'cod_curso',
-        },
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE',
-      },
       titulo_video: {
         type: Sequelize.STRING(40),
         allowNull: false,
