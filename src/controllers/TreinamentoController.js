@@ -44,7 +44,25 @@ module.exports = {
 
   async store(req, res) {
     try {
+      const { usuarios, cursos } = req.body;
+
       const novoTreinamento = await Treinamento.create(req.body);
+
+      if (usuarios) {
+        const usuariosArr = [];
+        usuarios.forEach((u) => {
+          usuariosArr.push(u.cpf);
+        });
+        await novoTreinamento.setUsuarios(usuariosArr);
+      }
+
+      if (cursos) {
+        const cursosArr = [];
+        cursos.forEach((c) => {
+          cursosArr.push(c.cod_curso);
+        });
+        await novoTreinamento.setCursos(cursosArr);
+      }
 
       return res.json(novoTreinamento);
     } catch (error) {
