@@ -6,8 +6,8 @@ module.exports = {
   async index(req, res) {
     try {
       const videos = await Video.findAll({
-        include: [{ model: Curso, as: 'curso' }],
-        order: ['titulo_video'],
+        include: [{ model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] }],
+        order: [['titulo_video'], ['cursos', 'nome_curso']],
       });
 
       return res.json(videos);
@@ -20,10 +20,10 @@ module.exports = {
     try {
       const { id } = req.params;
       const video = await Video.findByPk(id, {
-        include: [{ model: Curso, as: 'curso', include: 'videos' }, 'comentarios'],
+        include: [{ model: Curso, as: 'cursos' }, 'comentarios'],
         order: [['comentarios', 'created_at', 'DESC']],
       });
-
+      console.log(video);
       return res.json(video);
     } catch (error) {
       return null;
@@ -32,7 +32,19 @@ module.exports = {
 
   async store(req, res) {
     try {
+      const { cursos } = req.body;
       const novoVideo = await Video.create(req.body);
+
+      if (cursos) {
+        const cursosArr = [];
+
+        cursos.forEach((c) => {
+          cursosArr.push(c.cod_curso);
+        });
+
+        await novoVideo.setCursos(cursosArr);
+      }
+
       return res.json(novoVideo);
     } catch (error) {
       return res.status(400).json({
@@ -44,6 +56,7 @@ module.exports = {
   async update(req, res) {
     try {
       const { id } = req.params;
+      const { cursos } = req.body;
 
       if (!id) {
         return res.status(400).json({
@@ -57,6 +70,16 @@ module.exports = {
         return res.status(400).json({
           erros: ['Vídeo não existe.'],
         });
+      }
+
+      if (cursos) {
+        const cursosArr = [];
+
+        cursos.forEach((c) => {
+          cursosArr.push(c.cod_curso);
+        });
+
+        await video.setCursos(cursosArr);
       }
 
       const videoEditado = await video.update(req.body);
@@ -114,11 +137,18 @@ module.exports = {
         where: {
           [Op.and]: [
             { titulo_video: { [Op.substring]: titulo_video } },
-            { cod_curso: { [Op.substring]: cod_curso } },
           ],
         },
-        include: [{ model: Curso, as: 'curso' }],
-        order: ['titulo_video'],
+        include: [
+          {
+            model: Curso,
+            as: 'cursos',
+            where: {
+              cod_curso: cod_curso || { [Op.not]: null },
+            },
+          },
+        ],
+        order: [['titulo_video'], ['cursos', 'nome_curso']],
       });
 
       return res.json(videos);

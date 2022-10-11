@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 
 import Curso from '../models/Curso';
+import Video from '../models/Video';
 import upload from '../services/multer';
 import { apagarFotoCurso } from '../helpers/CursoHelper';
 
@@ -8,7 +9,7 @@ class CursoController {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
-        include: ['videos'],
+        include: [{ model: Video, as: 'videos', attributes: ['cod_video', 'titulo_video', 'link'] }],
         order: [['nome_curso'], ['videos', 'titulo_video', 'ASC']],
       });
       return res.json(cursos);
@@ -22,6 +23,7 @@ class CursoController {
       const { id } = req.params;
       const curso = await Curso.findByPk(id, {
         include: 'videos',
+        order: [['videos', 'titulo_video', 'ASC']],
       });
 
       return res.json(curso);
@@ -47,6 +49,7 @@ class CursoController {
         }
 
         const novoCurso = await Curso.create(objCurso);
+
         return res.json(novoCurso);
       });
     } catch (error) {
@@ -103,6 +106,20 @@ class CursoController {
           }
         }
 
+        if (req.body.videos) { // atualizar videos
+          const videos = JSON.parse(req.body.videos);
+
+          if (videos.length > 0) {
+            const videosArr = [];
+
+            videos.forEach((vid) => {
+              videosArr.push(vid.cod_video);
+            });
+
+            await curso.setVideos(videosArr);
+          }
+        }// atualizar videos
+
         const cursoEditado = await curso.update(objCurso);
         return res.json(cursoEditado);
       });
@@ -139,6 +156,7 @@ class CursoController {
         }
       }
 
+      await curso.setVideos(null);
       await curso.destroy();
 
       return res.json(curso); // também pode enviar null
@@ -155,12 +173,21 @@ class CursoController {
       const urlParams = new URLSearchParams(search);
 
       const nome_curso = urlParams.get('nome_curso');
+      const cod_video = urlParams.get('cod_video');
 
       const cursos = await Curso.findAll({
         where: {
           nome_curso: { [Op.substring]: nome_curso },
         },
-        include: ['videos'],
+        include: [
+          {
+            model: Video,
+            as: 'videos',
+            where: {
+              cod_video: cod_video || { [Op.not]: null },
+            },
+          },
+        ],
         order: [['nome_curso', 'ASC'], ['videos', 'titulo_video', 'ASC']],
       });
 
