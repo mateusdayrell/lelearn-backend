@@ -68,7 +68,14 @@ class Curso extends Model {
       as: 'treinamentos',
       foreignKey: 'cod_curso',
     });
-    this.hasMany(models.Video, { as: 'videos', foreignKey: 'cod_curso' });
+
+    this.belongsToMany(models.Video, {
+      through: 'cursos_videos',
+      as: 'videos',
+      foreignKey: 'cod_curso',
+    });
+
+    // this.hasMany(models.Video, { as: 'videos', foreignKey: 'cod_curso' });
   }
 }
 
