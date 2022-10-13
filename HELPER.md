@@ -2,7 +2,7 @@
 
 ### Undo the migrations
 ```
-npx sequelize db:migrate
+npx sequelize db:migrate:undo:all
 ```
 
 ### Run the migrations
