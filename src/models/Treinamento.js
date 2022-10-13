@@ -43,6 +43,8 @@ class Treinamento extends Model {
       },
       {
         sequelize,
+        paranoid: true,
+        deletedAt: 'daleted_at',
       },
     );
     return this;

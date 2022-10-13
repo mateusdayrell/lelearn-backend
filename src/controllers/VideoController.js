@@ -9,7 +9,6 @@ module.exports = {
         include: [{ model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] }],
         order: [['titulo_video'], ['cursos', 'nome_curso']],
       });
-
       return res.json(videos);
     } catch (error) {
       return res.json(null);
@@ -114,7 +113,7 @@ module.exports = {
           erros: ['video não existe.'],
         });
       }
-
+      console.log('aqui');
       await video.destroy();
 
       return res.json(video); // também pode enviar null

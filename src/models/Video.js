@@ -52,6 +52,8 @@ class Video extends Model {
         },
       },
       {
+        paranoid: true,
+        deletedAt: 'daleted_at',
         sequelize,
       },
     );
@@ -61,7 +63,10 @@ class Video extends Model {
 
   static associate(models) {
     // this.belongsTo(models.Curso, { as: 'curso', foreignKey: 'cod_curso' });
-    this.hasMany(models.Comentario, { as: 'comentarios', foreignKey: 'cod_video' });
+    this.hasMany(models.Comentario, {
+      as: 'comentarios',
+      foreignKey: 'cod_video',
+    });
     this.belongsToMany(models.Usuario, {
       through: 'usuarios_videos',
       as: 'usuarios',

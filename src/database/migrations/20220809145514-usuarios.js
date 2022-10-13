@@ -43,6 +43,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
+      daleted_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
   },
 

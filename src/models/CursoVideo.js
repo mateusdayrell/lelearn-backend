@@ -28,6 +28,8 @@ class CursoVideo extends Model {
       {
         sequelize,
         tableName: 'cursos_videos',
+        paranoid: true,
+        deletedAt: 'daleted_at',
       },
     );
 
