@@ -12,6 +12,7 @@ import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
 import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 import treinamentoCursoController from '../controllers/TreinamentoCursoController';
+import cursoVideoController from '../controllers/CursoVideoController';
 
 const router = new Router();
 
@@ -44,6 +45,9 @@ router.get('/videos/search/:search', videoController.search);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
 router.delete('/videos/:id', videoController.destroy);
+
+// CURSO-VIDEO
+router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS
 router.get('/treinamentos/', treinamentoController.index);
