@@ -1,13 +1,27 @@
 const { Op } = require('sequelize');
 const Video = require('../models/Video');
 const Curso = require('../models/Curso');
+const Comentario = require('../models/Comentario');
 
 module.exports = {
   async index(req, res) {
     try {
       const videos = await Video.findAll({
-        include: [{ model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] }],
-        order: [['titulo_video'], ['cursos', 'nome_curso']],
+        include: [
+          {
+            model: Curso,
+            as: 'cursos',
+            attributes: ['cod_curso', 'nome_curso'],
+            include: [
+              {
+                model: Video,
+                as: 'videos',
+                attributes: ['cod_video', 'titulo_video'],
+              },
+            ],
+          },
+        ],
+        order: [['titulo_video'], ['cursos', 'nome_curso'], ['cursos', 'videos', 'titulo_video']],
       });
       return res.json(videos);
     } catch (error) {
@@ -19,7 +33,19 @@ module.exports = {
     try {
       const { id } = req.params;
       const video = await Video.findByPk(id, {
-        include: [{ model: Curso, as: 'cursos' }, 'comentarios'],
+        include: [
+          {
+            model: Curso,
+            as: 'cursos',
+            attributes: ['cod_curso', 'nome_curso'],
+            include: [{
+              model: Video, as: 'videos', attributes: ['cod_video', 'titulo_video'], order: ['titulo_video'],
+            }],
+          },
+          {
+            model: Comentario, as: 'comentarios',
+          },
+        ],
         order: [['comentarios', 'created_at', 'DESC']],
       });
       console.log(video);
