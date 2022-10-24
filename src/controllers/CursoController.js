@@ -4,13 +4,21 @@ import Curso from '../models/Curso';
 import Video from '../models/Video';
 import upload from '../services/multer';
 import { apagarFotoCurso } from '../helpers/CursoHelper';
+import CursoVideo from '../models/CursoVideo';
 
 class CursoController {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
-        include: [{ model: Video, as: 'videos', attributes: ['cod_video', 'titulo_video', 'link'] }],
-        order: [['nome_curso'], ['videos', 'titulo_video', 'ASC']],
+        include: [
+          {
+            model: Video,
+            as: 'videos',
+            attributes: ['cod_video', 'titulo_video'],
+            through: { attributes: ['ordem', 'cod_curso'] },
+          },
+        ],
+        order: [['nome_curso']],
       });
       return res.json(cursos);
     } catch (error) {
@@ -22,8 +30,12 @@ class CursoController {
     try {
       const { id } = req.params;
       const curso = await Curso.findByPk(id, {
-        include: 'videos',
-        order: [['videos', 'titulo_video', 'ASC']],
+        include: {
+          model: Video,
+          as: 'videos',
+          through: { attributes: ['ordem'] },
+          order: [['cursos_videos', 'ordem']],
+        },
       });
 
       return res.json(curso);
@@ -48,7 +60,24 @@ class CursoController {
           objCurso.nome_arquivo = filename;
         }
 
+        let videos = [];
+
+        if (objCurso.videos) {
+          videos = JSON.parse(objCurso.videos);
+          delete objCurso.videos;
+        }
+
         const novoCurso = await Curso.create(objCurso);
+
+        if (videos.length > 0) {
+          videos.forEach(async (video, index) => {
+            await CursoVideo.create({
+              cod_curso: novoCurso.cod_curso,
+              cod_video: video.cod_video,
+              ordem: index + 1,
+            });
+          });
+        }
 
         return res.json(novoCurso);
       });
@@ -109,15 +138,30 @@ class CursoController {
         if (req.body.videos) { // atualizar videos
           const videos = JSON.parse(req.body.videos);
 
-          if (videos.length > 0) {
-            const videosArr = [];
-
-            videos.forEach((vid) => {
-              videosArr.push(vid.cod_video);
+          videos.forEach(async (video, index) => {
+            const cursoVideo = await CursoVideo.findOne({
+              where: { cod_curso: id, cod_video: video.cod_video },
             });
 
-            await curso.setVideos(videosArr);
-          }
+            if (!cursoVideo) {
+              await CursoVideo.create({
+                cod_curso: id,
+                cod_video: video.cod_video,
+                ordem: index + 1,
+              });
+            } else {
+              console.log({
+                cod_curso: id,
+                cod_video: video.titulo_video,
+                ordem: index,
+              });
+              cursoVideo.update({
+                cod_curso: id,
+                cod_video: video.cod_video,
+                ordem: index + 1,
+              });
+            }
+          });
         }// atualizar videos
 
         const cursoEditado = await curso.update(objCurso);
