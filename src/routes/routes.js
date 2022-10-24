@@ -47,6 +47,9 @@ router.put('/videos/:id', videoController.update);
 router.delete('/videos/:id', videoController.destroy);
 
 // CURSO-VIDEO
+router.get('/curso-video/', cursoVideoController.index);
+router.get('/curso-video/cursos', cursoVideoController.getCursos);
+router.get('/curso-video/videos', cursoVideoController.getVideos);
 router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS

@@ -24,8 +24,16 @@ class CursoVideo extends Model {
             },
           },
         },
+        ordem: {
+          type: DataTypes.INTEGER,
+          defaultValue: '',
+          allowNull: false,
+        },
       },
       {
+        defaultScope: {
+          attributes: ['cod_curso', 'cod_video', 'ordem'],
+        },
         sequelize,
         tableName: 'cursos_videos',
       },
@@ -35,8 +43,8 @@ class CursoVideo extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Curso, { foreignKey: 'cod_curso' });
-    this.belongsTo(models.Video, { foreignKey: 'cod_video' });
+    this.belongsTo(models.Curso, { foreignKey: 'cod_curso', as: 'curso' });
+    this.belongsTo(models.Video, { foreignKey: 'cod_video', as: 'video' });
   }
 }
 

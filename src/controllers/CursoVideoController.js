@@ -4,6 +4,90 @@ import CursoVideo from '../models/CursoVideo';
 import Comentario from '../models/Comentario';
 
 class CursoVideoController {
+  async index(req, res) {
+    try {
+      const cursosVideos = await CursoVideo.findAll({
+        include: [
+          {
+            model: Curso,
+            as: 'curso',
+            include: [
+              {
+                model: Video,
+                as: 'videos',
+                attributes: ['cod_video', 'titulo_video'],
+                order: ['titulo_video'],
+              },
+            ],
+          },
+          {
+            model: Video,
+            as: 'video',
+            include: [
+              {
+                model: Comentario,
+                as: 'comentarios',
+                order: ['comentarios', 'created_at', 'DESC'],
+              },
+            ],
+          },
+        ],
+      });
+      return res.json(cursosVideos);
+    } catch (error) {
+      return res.json(null);
+    }
+  }
+
+  async getCursos(req, res) {
+    try {
+      const cursosVideos = await CursoVideo.findAll({
+        include: [
+          {
+            model: Curso,
+            as: 'curso',
+            include: [
+              {
+                model: Video,
+                as: 'videos',
+                attributes: ['cod_video', 'titulo_video'],
+                order: ['titulo_video'],
+              },
+            ],
+          },
+        ],
+        group: ['cod_curso'],
+      });
+      console.log(cursosVideos.length);
+      return res.json(cursosVideos);
+    } catch (error) {
+      return res.json(null);
+    }
+  }
+
+  async getVideos(req, res) {
+    try {
+      const cursosVideos = await CursoVideo.findAll({
+        include: [
+          {
+            model: Video,
+            as: 'video',
+            include: [
+              {
+                model: Comentario,
+                as: 'comentarios',
+                order: ['comentarios', 'created_at', 'DESC'],
+              },
+            ],
+          },
+        ],
+      });
+      return res.json(cursosVideos);
+    } catch (error) {
+      return res.json(null);
+    }
+  }
+
   async show(req, res) {
     try {
       const { cod_curso, cod_video } = req.params;
