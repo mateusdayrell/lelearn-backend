@@ -24,6 +24,10 @@ class TreinamentoUsuario extends Model {
             },
           },
         },
+        prazo: {
+          type: DataTypes.DATE,
+          allowNull: true,
+        },
       },
       {
         sequelize,

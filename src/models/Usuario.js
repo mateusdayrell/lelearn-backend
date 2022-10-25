@@ -108,7 +108,7 @@ class Usuario extends Model {
   static associate(models) {
     this.belongsToMany(models.Treinamento, {
       through: 'treinamentos_usuarios',
-      as: 'treinamento',
+      as: 'treinamentos',
       foreignKey: 'cpf',
     });
     this.belongsToMany(models.Video, {
