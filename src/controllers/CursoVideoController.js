@@ -58,7 +58,7 @@ class CursoVideoController {
         ],
         group: ['cod_curso'],
       });
-      console.log(cursosVideos.length);
+
       return res.json(cursosVideos);
     } catch (error) {
       return res.json(null);
@@ -90,6 +90,7 @@ class CursoVideoController {
 
   async show(req, res) {
     try {
+      console.log('entrou');
       const { cod_curso, cod_video } = req.params;
 
       if (!cod_curso) {
@@ -109,17 +110,20 @@ class CursoVideoController {
         include: [
           {
             model: Curso,
+            as: 'curso',
             include: [
               {
                 model: Video,
                 as: 'videos',
                 attributes: ['cod_video', 'titulo_video'],
-                order: ['titulo_video'],
+                through: { attributes: ['ordem', 'cod_curso'] },
               },
             ],
+
           },
           {
             model: Video,
+            as: 'video',
             include: [
               {
                 model: Comentario,
