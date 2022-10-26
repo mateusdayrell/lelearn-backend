@@ -8,8 +8,7 @@ module.exports = {
   async index(req, res) {
     try {
       const treinamentos = await Treinamento.findAll({
-        include: [{ model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome'] }, 'cursos'],
-        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
+        order: [['nome_treinamento']],
       });
 
       return res.json(treinamentos);
@@ -28,7 +27,18 @@ module.exports = {
         });
       }
 
-      const treinamento = await Treinamento.findByPk(id);
+      const treinamento = await Treinamento.findByPk(id, {
+        include: [
+          {
+            model: Usuario,
+            as: 'usuarios',
+            attributes: ['cpf', 'nome'],
+            through: { attributes: ['prazo'] },
+          },
+          'cursos',
+        ],
+        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
+      });
 
       if (!treinamento) {
         return res.status(400).json({
@@ -188,6 +198,25 @@ module.exports = {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
+    }
+  },
+
+  async getByUsuario(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Usuário não enviado.'],
+        });
+      }
+
+      const usuario = await Usuario.findByPk(id);
+
+      const treinamentos = usuario.getTreinamentos({ joinTableAttributes: ['prazo'] });
+      return res.json(treinamentos);
+    } catch (error) {
+      return res.json(null);
     }
   },
 };

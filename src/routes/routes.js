@@ -60,6 +60,7 @@ router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 router.get('/treinamentos/', treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
 router.get('/treinamentos/search/:search', treinamentoController.search);
+router.get('/treinamentos/get-by-usuario/:id', treinamentoController.getByUsuario);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);
 router.delete('/treinamentos/:id', treinamentoController.destroy);
