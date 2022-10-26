@@ -31,9 +31,6 @@ class CursoVideo extends Model {
         },
       },
       {
-        defaultScope: {
-          attributes: ['cod_curso', 'cod_video', 'ordem'],
-        },
         sequelize,
         tableName: 'cursos_videos',
       },

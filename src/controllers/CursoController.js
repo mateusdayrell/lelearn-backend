@@ -10,14 +10,6 @@ class CursoController {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
-        include: [
-          {
-            model: Video,
-            as: 'videos',
-            attributes: ['cod_video', 'titulo_video'],
-            through: { attributes: ['ordem', 'cod_curso'] },
-          },
-        ],
         order: [['nome_curso']],
       });
       return res.json(cursos);
@@ -150,11 +142,6 @@ class CursoController {
                 ordem: index + 1,
               });
             } else {
-              console.log({
-                cod_curso: id,
-                cod_video: video.titulo_video,
-                ordem: index,
-              });
               cursoVideo.update({
                 cod_curso: id,
                 cod_video: video.cod_video,
@@ -239,6 +226,26 @@ class CursoController {
     } catch (error) {
       console.log(error);
       return error;
+    }
+  }
+
+  async getByVideo(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Video não enviado.'],
+        });
+      }
+
+      const video = await Video.findByPk(id);
+
+      const cursos = await video.getCursos();
+
+      return res.json(cursos);
+    } catch (error) {
+      return res.json(null);
     }
   }
 }

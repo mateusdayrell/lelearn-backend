@@ -7,21 +7,7 @@ module.exports = {
   async index(req, res) {
     try {
       const videos = await Video.findAll({
-        include: [
-          {
-            model: Curso,
-            as: 'cursos',
-            attributes: ['cod_curso', 'nome_curso'],
-            include: [
-              {
-                model: Video,
-                as: 'videos',
-                attributes: ['cod_video', 'titulo_video'],
-              },
-            ],
-          },
-        ],
-        order: [['titulo_video'], ['cursos', 'nome_curso'], ['cursos', 'videos', 'titulo_video']],
+        order: [['titulo_video']],
       });
       return res.json(videos);
     } catch (error) {
@@ -48,7 +34,7 @@ module.exports = {
         ],
         order: [['comentarios', 'created_at', 'DESC']],
       });
-      console.log(video);
+
       return res.json(video);
     } catch (error) {
       return null;
@@ -139,7 +125,7 @@ module.exports = {
           erros: ['video não existe.'],
         });
       }
-      console.log('aqui');
+
       await video.destroy();
 
       return res.json(video); // também pode enviar null
@@ -180,6 +166,26 @@ module.exports = {
     } catch (error) {
       console.log(error);
       return error;
+    }
+  },
+
+  async getByCurso(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Curso não enviado.'],
+        });
+      }
+
+      const curso = await Curso.findByPk(id);
+
+      const videos = await curso.getVideos({ joinTableAttributes: ['ordem'] });
+
+      return res.json(videos);
+    } catch (error) {
+      return res.json(null);
     }
   },
 };
