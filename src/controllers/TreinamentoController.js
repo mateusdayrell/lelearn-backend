@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const Curso = require('../models/Curso');
 const Usuario = require('../models/Usuario');
+const TreinamentoUsuario = require('../models/TreinamentoUsuario');
 
 const Treinamento = require('../models/Treinamento');
 
@@ -86,7 +87,6 @@ module.exports = {
     try {
       const { id } = req.params;
       const { usuarios, cursos } = req.body;
-      const usuariosArr = [];
       const cursosArr = [];
 
       if (!id) {
@@ -95,9 +95,7 @@ module.exports = {
         });
       }
 
-      const treinamento = await Treinamento.findByPk(id, {
-        include: [{ model: Usuario, as: 'usuarios', attributes: ['cpf', 'nome'] }, 'cursos'],
-      });
+      const treinamento = await Treinamento.findByPk(id);
 
       if (!treinamento) {
         return res.status(400).json({
@@ -106,10 +104,22 @@ module.exports = {
       }
 
       if (usuarios) {
-        usuarios.forEach((u) => {
-          usuariosArr.push(u.cpf);
+        usuarios.forEach(async (u) => {
+          const tUsuario = await TreinamentoUsuario.findOne({
+            where: {
+              cpf: u.cpf, cod_treinamento: id,
+            },
+          });
+
+          const objUsuario = {
+            cpf: u.cpf,
+            cod_treinamento: id,
+            prazo: new Date(u.treinamentos_usuarios.prazo),
+          };
+
+          if (tUsuario) await tUsuario.update(objUsuario);
+          else await TreinamentoUsuario.create(objUsuario);
         });
-        await treinamento.setUsuarios(usuariosArr);
       }
 
       if (cursos) {
