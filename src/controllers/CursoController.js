@@ -114,6 +114,7 @@ class CursoController {
 
         const objCurso = { ...req.body };
 
+        // FOTO
         if (req.file) {
           const { filename } = req.file;
           objCurso.nome_arquivo = filename;
@@ -126,30 +127,56 @@ class CursoController {
             });
           }
         }
+        // FOTO
 
-        if (req.body.videos) { // atualizar videos
+        // VIDEOS
+        if (req.body.videos) {
           const videos = JSON.parse(req.body.videos);
 
-          videos.forEach(async (video, index) => {
-            const cursoVideo = await CursoVideo.findOne({
-              where: { cod_curso: id, cod_video: video.cod_video },
+          if (videos.length > 0) {
+            const antigos = await CursoVideo.findAll({
+              where: {
+                cod_curso: id,
+              },
+              attributes: ['cod_video'],
+              raw: true,
+            });
+            const arrAntigos = antigos.flatMap((el) => el.cod_video);
+
+            videos.forEach(async (video, i) => {
+              const index = arrAntigos.indexOf(video.cod_video);
+              arrAntigos.splice(index, 1); // remover codigos ja atualizados
+
+              const cursoVideo = await CursoVideo.findOne({
+                where: { cod_curso: id, cod_video: video.cod_video },
+              });
+
+              if (!cursoVideo) { // create
+                await CursoVideo.create({
+                  cod_curso: id,
+                  cod_video: video.cod_video,
+                  ordem: i + 1,
+                });
+              } else { // update order
+                await cursoVideo.update({
+                  cod_curso: id,
+                  cod_video: video.cod_video,
+                  ordem: i + 1,
+                });
+              }
             });
 
-            if (!cursoVideo) {
-              await CursoVideo.create({
+            await CursoVideo.destroy({ // destroy
+              where: {
                 cod_curso: id,
-                cod_video: video.cod_video,
-                ordem: index + 1,
-              });
-            } else {
-              cursoVideo.update({
-                cod_curso: id,
-                cod_video: video.cod_video,
-                ordem: index + 1,
-              });
-            }
-          });
-        }// atualizar videos
+                cod_video: [arrAntigos],
+              },
+            });
+          } else {
+            await curso.setVideos([]);
+          }
+        }
+        // VIDEOS
 
         const cursoEditado = await curso.update(objCurso);
         return res.json(cursoEditado);
