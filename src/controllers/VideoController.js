@@ -59,7 +59,15 @@ module.exports = {
       return res.json(novoVideo);
     } catch (error) {
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error.errors.map((err) => {
+          if (err.message === 'PRIMARY must be unique') {
+            return res.json('Código do vídeo já cadastrado');
+          }
+          if (err.message === 'titulo_video must be unique') {
+            err.message = 'Título já cadastrado!';
+          }
+          return err.message;
+        }),
       });
     }
   },
@@ -101,6 +109,9 @@ module.exports = {
         erros: error.errors.map((err) => {
           if (err.message === 'PRIMARY must be unique') {
             return res.json('Código do vídeo já cadastrado');
+          }
+          if (err.message === 'titulo_video must be unique') {
+            err.message = 'Título já cadastrado!';
           }
           return err.message;
         }),

@@ -9,6 +9,7 @@ module.exports = {
       titulo_video: {
         type: Sequelize.STRING(40),
         allowNull: false,
+        unique: true,
       },
       desc_video: {
         type: Sequelize.STRING(150),
