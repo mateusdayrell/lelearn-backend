@@ -144,23 +144,34 @@ module.exports = {
       const titulo_video = urlParams.get('titulo_video');
       const cod_curso = urlParams.get('cod_curso');
 
-      const videos = await Video.findAll({
-        where: {
-          [Op.and]: [
-            { titulo_video: { [Op.substring]: titulo_video } },
-          ],
-        },
-        include: [
-          {
-            model: Curso,
-            as: 'cursos',
+      const videos = await Video.findAll(
+        cod_curso
+          ? {
             where: {
-              cod_curso: cod_curso || { [Op.not]: null },
+              [Op.and]: [
+                { titulo_video: { [Op.substring]: titulo_video } },
+              ],
             },
+            include: [
+              {
+                model: Curso,
+                as: 'cursos',
+                where: {
+                  cod_curso,
+                },
+              },
+            ],
+            order: [['titulo_video'], ['cursos', 'nome_curso']],
+          }
+          : {
+            where: {
+              [Op.and]: [
+                { titulo_video: { [Op.substring]: titulo_video } },
+              ],
+            },
+            order: ['titulo_video'],
           },
-        ],
-        order: [['titulo_video'], ['cursos', 'nome_curso']],
-      });
+      );
 
       return res.json(videos);
     } catch (error) {
