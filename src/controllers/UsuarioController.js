@@ -34,7 +34,10 @@ module.exports = {
       return res.status(400).json({
         erros: error.errors.map((err) => {
           if (err.message === 'PRIMARY must be unique') {
-            return 'Código do vídeo já cadastrado!';
+            err.message = 'CPF já cadastrado!';
+          }
+          if (err.message === 'email must be unique') {
+            err.message = 'Email já cadastrado!';
           }
           return err.message;
         }),
