@@ -29,13 +29,12 @@ class Usuario extends Model {
         telefone: {
           type: DataTypes.STRING,
           defaultValue: '',
-          allowNull: false,
+          allowNull: true,
           validate: {
             len: {
-              args: [10, 11],
+              args: [0, 11],
               msg: 'O telefone deve ter entre 10 e 11 caracteres.',
             },
-            isInt: { args: true, msg: 'Telefone inválido' },
           },
         },
         email: {
