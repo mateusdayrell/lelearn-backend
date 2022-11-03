@@ -166,12 +166,14 @@ class CursoController {
               }
             });
 
-            await CursoVideo.destroy({ // destroy
-              where: {
-                cod_curso: id,
-                cod_video: [arrAntigos],
-              },
-            });
+            if (arrAntigos.length > 0) {
+              await CursoVideo.destroy({ // destroy
+                where: {
+                  cod_curso: id,
+                  cod_video: [arrAntigos],
+                },
+              });
+            }
           } else {
             await curso.setVideos([]);
           }
