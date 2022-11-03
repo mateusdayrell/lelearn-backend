@@ -103,8 +103,18 @@ module.exports = {
         });
       }
 
-      if (usuarios) {
+      if (usuarios) { // USUARIOS
+        const antigos = await TreinamentoUsuario.findAll({
+          where: { cod_treinamento: id },
+          attributes: ['cpf'],
+          raw: true,
+        });
+        const arrAntigos = antigos.flatMap((el) => el.cpf);
+
         usuarios.forEach(async (u) => {
+          const index = arrAntigos.indexOf(u.cpf);
+          arrAntigos.splice(index, 1); // remover cpfs ja atualizados
+
           const tUsuario = await TreinamentoUsuario.findOne({
             where: {
               cpf: u.cpf, cod_treinamento: id,
@@ -114,13 +124,22 @@ module.exports = {
           const objUsuario = {
             cpf: u.cpf,
             cod_treinamento: id,
-            prazo: new Date(u.treinamentos_usuarios.prazo),
+            prazo: u.treinamentos_usuarios.prazo ? new Date(u.treinamentos_usuarios.prazo) : null,
           };
 
-          if (tUsuario) await tUsuario.update(objUsuario);
-          else await TreinamentoUsuario.create(objUsuario);
+          if (tUsuario) await tUsuario.update(objUsuario); // UPDATE
+          else await TreinamentoUsuario.create(objUsuario); // CREATE
         });
-      }
+
+        if (arrAntigos.length > 0) {
+          await TreinamentoUsuario.destroy({ // DESTROY
+            where: {
+              cod_treinamento: id,
+              cpf: [arrAntigos],
+            },
+          });
+        }
+      } // USUARIOS
 
       if (cursos) {
         cursos.forEach((c) => {
