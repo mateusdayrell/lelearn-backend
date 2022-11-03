@@ -68,7 +68,15 @@ module.exports = {
       return res.json(usuarioEditado);
     } catch (error) {
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error.errors.map((err) => {
+          if (err.message === 'PRIMARY must be unique') {
+            err.message = 'CPF já cadastrado!';
+          }
+          if (err.message === 'email must be unique') {
+            err.message = 'Email já cadastrado!';
+          }
+          return err.message;
+        }),
       });
     }
   },
