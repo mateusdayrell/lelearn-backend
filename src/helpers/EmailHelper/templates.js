@@ -13,16 +13,21 @@ module.exports = {
       </head>
       <body style='background-color: #1f1f23; font-family: "Montserrat", sans-serif;'>
         <div style='background-color: #1f1f23; color: #00B37E;  display: flex; justify-content: center;'>
-            <h2> Recuperação de senha LeLearn </h2>
+            <h2 style='padding-left: 10px;'> Recuperação de senha LeLearn </h2>
         </div>
-        <div style='background-color: #28282c; color: white; text-align: center; display: flex; justify-content: center;flex-direction: column;align-items: center;'>
-            <p>
-                <label>Você solicitou a redefinição de sua senha.</label> <br>
-                <label>Copie o código abaixo e cole no campo indicado na página anterior do LeLearn.</label> <br>
+        <div style='background-color: #28282c; width: 100%; color: #FFFFFF; text-align: center; margin: 0 10px;'>
+            <p style='padding-top: 5px;'>
+                <label>Você solicitou a alteração da sua senha.</label> <br>
+                <label>Utilize o código abaixo para concluir o processo.</label> <br>
             </p>
-            <div style="width: 50%; background-color:#343438; color: #00B37E; margin-top: 10px; padding: 10px; margin-bottom: 10px;">
+            <div style="width: 50%; background-color:#343438; color: #00B37E; margin: auto; padding: 5px;">
                 <label>${token}</label>
             </div>
+            <p style='padding-bottom: 5px;'>
+                <label>Se você não solicitou esse código, é possível que outra</label> <br>
+                <label>pessoa esteja tentando acessar a sua conta do Lelearn.</label> <br>
+                <label>Não encaminhe ou dê o código a ninguém.</label>
+            </p>
         </div>
       </body>
     </html>
