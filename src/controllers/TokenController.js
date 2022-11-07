@@ -11,7 +11,7 @@ module.exports = {
 
     if (!email || !senha) {
       return res.status(401).json({
-        erros: ['Credenciais inválidas.'],
+        erros: ['E-mail e/ou senha inválidos.'],
       });
     }
 
@@ -19,13 +19,13 @@ module.exports = {
 
     if (!usuario) {
       return res.status(401).json({
-        erros: ['Usuário não existe.'],
+        erros: ['E-mail e/ou senha inválidos.'],
       });
     }
 
     if (!(await usuario.validarSenha(senha))) {
       return res.status(401).json({
-        erros: ['Senha inválida.'],
+        erros: ['E-mail e/ou senha inválidos.'],
       });
     }
 
@@ -64,7 +64,7 @@ module.exports = {
 
       if (!email || email !== usuario.email) {
         return res.status(400).json({
-          erros: ['Email inválido!'],
+          erros: ['Dados incorretos!'],
         });
       }
       // Conferir e validar dados
@@ -72,8 +72,8 @@ module.exports = {
       // Criar e atualizar token
       const token = crypto.randomBytes(5).toString('hex');
 
-      const tokenExpiration = new Date(); // tempo de expiração do token de 1h
-      tokenExpiration.setHours(tokenExpiration.getHours() + 1);
+      const tokenExpiration = new Date(); // tempo de expiração do token de 15min
+      tokenExpiration.setMinutes(tokenExpiration.getMinutes() + 15);
 
       await usuario.update({ // atualizar token
         password_reset_token: token,
@@ -83,7 +83,6 @@ module.exports = {
 
       const template = await forgotPasswordTemplate(token); // montar template de email
       const enviado = await sendMail(email, 'Recuperação de senha', template); // enviar email
-      // const enviado = true // <--  USAR PARA TESTES !!!
 
       if (!enviado) {
         return res.status(400).json({
