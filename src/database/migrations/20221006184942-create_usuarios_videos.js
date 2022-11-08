@@ -12,6 +12,17 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
+      cod_curso: {
+        type: Sequelize.STRING(4),
+        allowNull: false,
+        references: {
+          model: 'cursos',
+          key: 'cod_curso',
+        },
+        primaryKey: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
       cod_video: {
         type: Sequelize.STRING(4),
         allowNull: false,
