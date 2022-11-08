@@ -1,10 +1,14 @@
-import { Op } from 'sequelize';
+import {
+  Op, fn, col, QueryTypes,
+} from 'sequelize';
 
 import Curso from '../models/Curso';
 import Video from '../models/Video';
 import upload from '../services/multer';
 import { apagarFotoCurso } from '../helpers/CursoHelper';
 import CursoVideo from '../models/CursoVideo';
+import Usuario from '../models/Usuario';
+import UsuarioVideo from '../models/UsuarioVideo';
 
 class CursoController {
   async index(req, res) {
@@ -274,6 +278,54 @@ class CursoController {
 
       return res.json(cursos);
     } catch (error) {
+      return res.json(null);
+    }
+  }
+
+  async getByUser(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      // const usuario = await Usuario.findByPk(id);
+
+      // const usuarioCursos = await UsuarioVideo.findAndCountAll({
+      //   where: { cpf: id },
+      //   group: 'cod_curso',
+      //   include: 'curso',
+      // });
+
+      // const usuarioCursos = await UsuarioVideo.findAll({
+      //   where: { cpf: id },
+      //   include: {
+      //     model: Curso,
+      //     as: 'curso',
+      //   },
+      //   attributes: {
+      //     include: [[fn('COUNT', col('curso.cod_curso')), 'qtdVideos']],
+      //   },
+      //   group: 'cod_curso',
+      // });
+
+      // const where = `WHERE cpf = ${id}`;
+
+      const usuarioCursos = await UsuarioVideo.sequelize.query(
+        `SELECT UV.cod_curso, count(UV.cod_video) as qtd_assistido,
+        (SELECT COUNT(CV.cod_video) as count FROM cursos_videos CV) as qtd
+         FROM usuarios_videos UV
+         WHERE cpf = ${id} GROUP BY cod_curso`,
+        { type: QueryTypes.SELECT },
+      );
+
+      console.log(usuarioCursos);
+      return res.json(usuarioCursos);
+    } catch (error) {
+      console.log(error);
       return res.json(null);
     }
   }

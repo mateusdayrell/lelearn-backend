@@ -29,14 +29,15 @@ router.post('/usuarios/', usuarioController.store);
 router.put('/usuarios/:id', usuarioController.update);
 router.delete('/usuarios/:id', usuarioController.destroy);
 
-router.get('/usuarios-videos/:cpf', usuarioController.getVideos);
-router.put('/usuarios-videos/:cpf/:codVideo', usuarioController.updateVideo);
+router.get('/usuarios-videos/:cpf/:cod_curso', usuarioController.getVideos);
+router.put('/usuarios-videos/:cpf/:cod_curso/:cod_video', usuarioController.updateVideo);
 
 // CURSOS
 router.get('/cursos/', cursoController.index);
 router.get('/cursos/:id', cursoController.show);
 router.get('/cursos/search/:search', cursoController.search);
 router.get('/cursos/get-by-video/:id', cursoController.getByVideo);
+router.get('/cursos/get-by-user/:id', cursoController.getByUser);
 router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
 router.delete('/cursos/:id', cursoController.destroy);

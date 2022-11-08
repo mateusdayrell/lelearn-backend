@@ -1,6 +1,6 @@
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const Usuario = require('../models/Usuario');
-const Video = require('../models/Video');
+const UsuarioVideo = require('../models/UsuarioVideo');
 
 module.exports = {
   async index(req, res) {
@@ -139,29 +139,20 @@ module.exports = {
 
   async getVideos(req, res) {
     try {
-      const { cpf } = req.params;
+      const { cpf, cod_curso } = req.params;
 
-      if (!cpf) {
+      if (!cpf || !cod_curso) {
         return res.status(400).json({
-          erros: ['CPF não enviado.'],
+          erros: ['Parâmetros incorretos.'],
         });
       }
 
-      const usuario = await Usuario.findByPk(cpf, {
-        include: [{
-          model: Video,
-          as: 'videos',
-          through: { attributes: [] },
-        }],
+      const videosUsuarios = await UsuarioVideo.findAll({
+        where: { cpf, cod_curso },
+        attributes: ['cod_video'],
       });
 
-      if (!usuario) {
-        return res.status(400).json({
-          erros: ['Usuário não existe.'],
-        });
-      }
-
-      return res.json(usuario.videos);
+      return res.json(videosUsuarios);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
@@ -171,11 +162,11 @@ module.exports = {
 
   async updateVideo(req, res) {
     try {
-      const { cpf, codVideo } = req.params;
+      const { cpf, cod_video, cod_curso } = req.params;
 
-      if (!cpf) {
+      if (!cpf || !cod_video || !cod_curso) {
         return res.status(400).json({
-          erros: ['CPF não enviado.'],
+          erros: ['Parâmetros incorretos.'],
         });
       }
 
@@ -187,14 +178,24 @@ module.exports = {
         });
       }
 
-      if (await usuario.hasVideo(codVideo)) await usuario.removeVideo(codVideo);
-      else await usuario.addVideo(codVideo);
+      const where = `WHERE cpf = ${cpf}
+        AND cod_curso = ${cod_curso}
+        AND cod_video = ${cod_video}`;
 
-      const usuarioVideos = await usuario.getVideos();
+      const usuarioVideo = await UsuarioVideo.sequelize.query(
+        `SELECT * FROM usuarios_videos ${where} LIMIT 1`,
+        { type: QueryTypes.SELECT },
+      );
 
-      return res.json(usuarioVideos);
+      if (usuarioVideo.length > 0) await UsuarioVideo.sequelize.query(`DELETE FROM usuarios_videos ${where}`);
+      else await UsuarioVideo.create(req.params);
+
+      const videosUsuario = await UsuarioVideo.findAll({
+        where: { cpf, cod_curso },
+      });
+
+      return res.json(videosUsuario);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
