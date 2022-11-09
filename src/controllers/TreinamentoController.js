@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const Curso = require('../models/Curso');
 const Usuario = require('../models/Usuario');
 const TreinamentoUsuario = require('../models/TreinamentoUsuario');
@@ -236,16 +236,45 @@ module.exports = {
 
       if (!id) {
         return res.status(400).json({
-          erros: ['Usuário não enviado.'],
+          erros: ['CPF não enviado.'],
         });
       }
 
-      const usuario = await Usuario.findByPk(id);
+      const treinamentosUsuarios = await Treinamento.sequelize.query(
+        `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento, T.created_at,
 
-      const treinamentos = usuario.getTreinamentos({ joinTableAttributes: ['prazo'] });
-      return res.json(treinamentos);
+        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
+          (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
+        as videos_assistidos,
+
+        (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento)
+        as total_cursos
+
+        FROM treinamentos T, treinamentos_usuarios TU
+        WHERE T.daleted_at IS NULL AND
+        TU.cod_treinamento = T.cod_treinamento AND
+        TU.cpf = ${id} ORDER BY T.nome_treinamento`,
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.json(treinamentosUsuarios);
     } catch (error) {
       return res.json(null);
     }
   },
 };
+
+// `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento, T.created_at,
+
+// (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
+//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
+// as videos_assistidos,
+
+// (SELECT COUNT(CV.cod_video) FROM cursos_videos CV WHERE CV.cod_curso IN
+//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
+// as total_videos
+
+// FROM treinamentos T, treinamentos_usuarios TU
+// WHERE T.daleted_at IS NULL AND
+// TU.cod_treinamento = T.cod_treinamento AND
+// TU.cpf = ${id} ORDER BY T.nome_treinamento`
