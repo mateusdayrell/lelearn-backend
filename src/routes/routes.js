@@ -37,7 +37,7 @@ router.get('/cursos/', cursoController.index);
 router.get('/cursos/:id', cursoController.show);
 router.get('/cursos/search/:search', cursoController.search);
 router.get('/cursos/get-by-video/:id', cursoController.getByVideo);
-router.get('/cursos/get-by-user/:id', cursoController.getByUser);
+router.get('/cursos/get-by-user/:id', cursoController.getByUsuario);
 router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
 router.delete('/cursos/:id', cursoController.destroy);
