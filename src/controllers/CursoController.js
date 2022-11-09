@@ -316,7 +316,7 @@ class CursoController {
 
       const usuarioCursos = await UsuarioVideo.sequelize.query(
         `SELECT UV.cod_curso, count(UV.cod_video) as qtd_assistido,
-        (SELECT COUNT(CV.cod_video) as count FROM cursos_videos CV) as qtd
+        (SELECT COUNT(CV.cod_video) as count FROM cursos_videos CV WHERE CV.cod_curso = UV.cod_curso) as qtd
          FROM usuarios_videos UV
          WHERE cpf = ${id} GROUP BY cod_curso`,
         { type: QueryTypes.SELECT },
