@@ -1,13 +1,10 @@
-import {
-  Op, fn, col, QueryTypes,
-} from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 
 import Curso from '../models/Curso';
 import Video from '../models/Video';
 import upload from '../services/multer';
 import { apagarFotoCurso } from '../helpers/CursoHelper';
 import CursoVideo from '../models/CursoVideo';
-import Usuario from '../models/Usuario';
 import UsuarioVideo from '../models/UsuarioVideo';
 
 class CursoController {
@@ -282,7 +279,7 @@ class CursoController {
     }
   }
 
-  async getByUser(req, res) {
+  async getByUsuario(req, res) {
     try {
       const { id } = req.params;
 
@@ -292,37 +289,14 @@ class CursoController {
         });
       }
 
-      // const usuario = await Usuario.findByPk(id);
-
-      // const usuarioCursos = await UsuarioVideo.findAndCountAll({
-      //   where: { cpf: id },
-      //   group: 'cod_curso',
-      //   include: 'curso',
-      // });
-
-      // const usuarioCursos = await UsuarioVideo.findAll({
-      //   where: { cpf: id },
-      //   include: {
-      //     model: Curso,
-      //     as: 'curso',
-      //   },
-      //   attributes: {
-      //     include: [[fn('COUNT', col('curso.cod_curso')), 'qtdVideos']],
-      //   },
-      //   group: 'cod_curso',
-      // });
-
-      // const where = `WHERE cpf = ${id}`;
-
       const usuarioCursos = await UsuarioVideo.sequelize.query(
-        `SELECT UV.cod_curso, count(UV.cod_video) as qtd_assistido,
-        (SELECT COUNT(CV.cod_video) as count FROM cursos_videos CV WHERE CV.cod_curso = UV.cod_curso) as qtd
-         FROM usuarios_videos UV
-         WHERE cpf = ${id} GROUP BY cod_curso`,
+        `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
+        (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
+        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${id} AND UV.cod_curso = c.cod_curso) as videos_assistidos
+         FROM cursos C WHERE C.daleted_at IS NULL ORDER BY C.nome_curso`,
         { type: QueryTypes.SELECT },
       );
 
-      console.log(usuarioCursos);
       return res.json(usuarioCursos);
     } catch (error) {
       console.log(error);
