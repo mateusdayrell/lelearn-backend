@@ -241,7 +241,7 @@ module.exports = {
       }
 
       const treinamentosUsuarios = await Treinamento.sequelize.query(
-        `SELECT T.cod_treinamento, T.nome_treinamento,
+        `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo,
 
         (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1 WHERE (SELECT COUNT(CV.cod_video)
           FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
