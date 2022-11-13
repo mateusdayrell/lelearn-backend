@@ -116,10 +116,7 @@ class CursoController {
         const objCurso = { ...req.body };
 
         // FOTO
-        if (req.file) {
-          const { filename } = req.file;
-          objCurso.nome_arquivo = filename;
-        }
+        objCurso.nome_arquivo = req.file ? req.file.filename : null;
 
         if (curso.nome_arquivo) {
           if (!apagarFotoCurso(curso.nome_arquivo)) {
