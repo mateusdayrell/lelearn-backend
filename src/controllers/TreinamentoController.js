@@ -197,30 +197,17 @@ module.exports = {
       const cpf = urlParams.get('cpf');
       const cod_curso = urlParams.get('cod_curso');
 
-      const treinamentos = await Treinamento.findAll({
-        where: {
-          [Op.and]: [
-            { nome_treinamento: { [Op.substring]: nome_treinamento } },
-          ],
-        },
-        include: [
-          {
-            model: Usuario,
-            as: 'usuarios',
-            where: {
-              cpf: cpf || { [Op.not]: null },
-            },
-          },
-          {
-            model: Curso,
-            as: 'cursos',
-            where: {
-              cod_curso: cod_curso || { [Op.not]: null },
-            },
-          },
-        ],
-        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
-      });
+      const treinamentos = await Treinamento.sequelize.query(
+        `SELECT T.cod_treinamento, T.nome_treinamento
+        FROM treinamentos T
+        WHERE
+        ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : '' }
+        ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
+        ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
+        ${cpf && cod_curso ? 'AND' : ''}
+        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento)` : ''}`,
+        { type: QueryTypes.SELECT },
+      );
 
       return res.json(treinamentos);
     } catch (error) {
