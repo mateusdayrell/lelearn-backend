@@ -24,8 +24,8 @@ class Treinamento extends Model {
           defaultValue: '',
           allowNull: false,
           unique: {
-              args: true,
-              msg: 'Nome do treinamento já cadastrado!'
+            args: true,
+            msg: 'Nome do treinamento já cadastrado!',
           },
           validate: {
             len: {

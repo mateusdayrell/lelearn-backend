@@ -24,8 +24,8 @@ class Video extends Model {
           type: DataTypes.STRING,
           allowNull: false,
           unique: {
-              args: true,
-              msg: 'Título do vídeo já cadastrado!'
+            args: true,
+            msg: 'Título do vídeo já cadastrado!',
           },
           validate: {
             len: {

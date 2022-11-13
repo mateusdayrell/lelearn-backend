@@ -1,5 +1,4 @@
-const { Op, QueryTypes } = require('sequelize');
-const Curso = require('../models/Curso');
+const { QueryTypes } = require('sequelize');
 const Usuario = require('../models/Usuario');
 const TreinamentoUsuario = require('../models/TreinamentoUsuario');
 
@@ -201,7 +200,7 @@ module.exports = {
         `SELECT T.cod_treinamento, T.nome_treinamento
         FROM treinamentos T
         WHERE
-        ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : '' }
+        ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : ''}
         ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
         ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
         ${cpf && cod_curso ? 'AND' : ''}
