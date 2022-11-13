@@ -7,10 +7,7 @@ class Usuario extends Model {
       { // init Model
         cpf: {
           type: DataTypes.STRING,
-          primaryKey: {
-              args: true,
-              msg: 'CPF já cadastrado!'
-          },
+          primaryKey: true,
           validate: {
             len: {
               args: [11, 11],
@@ -44,10 +41,7 @@ class Usuario extends Model {
           type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
-          unique: {
-              args: true,
-              msg: 'Email já cadastrado!'
-          },
+          unique: true,
           validate: {
             isEmail: {
               msg: 'Email inválido.',
