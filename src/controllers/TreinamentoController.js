@@ -241,13 +241,13 @@ module.exports = {
       }
 
       const treinamentosUsuarios = await Treinamento.sequelize.query(
-        `SELECT T.cod_treinamento, T.nome_treinamento,
+        `SELECT T.cod_treinamento, T.nome_treinamento, T.desc_treinamento,
 
         (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1 WHERE (SELECT COUNT(CV.cod_video)
           FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
-          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = 13211615229)) as cursos_assistidos,
+          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id})) as cursos_assistidos,
 
-        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = 13211615229 AND UV.cod_curso IN
+        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
           (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
         as videos_assistidos,
 
@@ -257,7 +257,7 @@ module.exports = {
         FROM treinamentos T, treinamentos_usuarios TU
         WHERE T.daleted_at IS NULL AND
         TU.cod_treinamento = T.cod_treinamento AND
-        TU.cpf = 13211615229 ORDER BY T.nome_treinamento`,
+        TU.cpf = ${id} ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },
       );
 
@@ -268,17 +268,3 @@ module.exports = {
   },
 };
 
-// `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento, T.created_at,
-
-// (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
-//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
-// as videos_assistidos,
-
-// (SELECT COUNT(CV.cod_video) FROM cursos_videos CV WHERE CV.cod_curso IN
-//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
-// as total_videos
-
-// FROM treinamentos T, treinamentos_usuarios TU
-// WHERE T.daleted_at IS NULL AND
-// TU.cod_treinamento = T.cod_treinamento AND
-// TU.cpf = ${id} ORDER BY T.nome_treinamento`
