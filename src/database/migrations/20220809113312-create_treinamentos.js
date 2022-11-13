@@ -9,6 +9,7 @@ module.exports = {
       nome_treinamento: {
         type: Sequelize.STRING(30),
         allowNull: false,
+        unique: true,
       },
       desc_treinamento: {
         type: Sequelize.STRING(150),

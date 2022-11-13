@@ -23,6 +23,10 @@ class Curso extends Model {
         nome_curso: {
           type: DataTypes.STRING(40),
           allowNull: false,
+          unique: {
+              args: true,
+              msg: 'Nome do curso já cadastrado!'
+          },
           validate: {
             len: {
               args: [3, 40],

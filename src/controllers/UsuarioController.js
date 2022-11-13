@@ -36,9 +36,6 @@ module.exports = {
           if (err.message === 'PRIMARY must be unique') {
             err.message = 'CPF já cadastrado!';
           }
-          if (err.message === 'email must be unique') {
-            err.message = 'Email já cadastrado!';
-          }
           return err.message;
         }),
       });
@@ -71,9 +68,6 @@ module.exports = {
         erros: error.errors.map((err) => {
           if (err.message === 'PRIMARY must be unique') {
             err.message = 'CPF já cadastrado!';
-          }
-          if (err.message === 'email must be unique') {
-            err.message = 'Email já cadastrado!';
           }
           return err.message;
         }),
