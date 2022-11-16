@@ -57,7 +57,7 @@ class Video extends Model {
       },
       {
         paranoid: true,
-        deletedAt: 'daleted_at',
+        deletedAt: 'deleted_at',
         sequelize,
       },
     );

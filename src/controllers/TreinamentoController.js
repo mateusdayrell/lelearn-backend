@@ -199,7 +199,7 @@ module.exports = {
       const treinamentos = await Treinamento.sequelize.query(
         `SELECT T.cod_treinamento, T.nome_treinamento
         FROM treinamentos T
-        WHERE T.daleted_at IS NULL AND
+        WHERE T.deleted_at IS NULL AND
         ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : ''}
         ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
         ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
@@ -243,7 +243,7 @@ module.exports = {
         T.desc_treinamento, T.created_at
 
         FROM treinamentos T, treinamentos_usuarios TU
-        WHERE T.daleted_at IS NULL AND
+        WHERE T.deleted_at IS NULL AND
         TU.cod_treinamento = T.cod_treinamento AND
         TU.cpf = ${id} ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },

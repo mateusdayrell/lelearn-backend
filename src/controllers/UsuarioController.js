@@ -55,8 +55,14 @@ module.exports = {
       const usuario = await Usuario.findByPk(id);
 
       if (!usuario) {
+        const desativado = await Usuario.findByPk(id, { paranoid: false });
+        if (!desativado) {
+          return res.status(400).json({
+            erros: ['Usuário não existe.'],
+          });
+        }
         return res.status(400).json({
-          erros: ['Usuário não existe.'],
+          erros: ['O usuário não pode ser editado pois está desativado.'],
         });
       }
 
@@ -93,8 +99,10 @@ module.exports = {
         });
       }
 
+      const controle = usuario.deleted_at !== null;
+
       await usuario.destroy({
-        force: usuario.daleted_at !== null,
+        force: controle,
       });
 
       return res.json(usuario); // também pode enviar null
@@ -123,7 +131,7 @@ module.exports = {
             { nome: { [Op.substring]: nome } },
             { tipo: { [Op.substring]: tipo } },
             status === 'inativo'
-              ? { daleted_at: { [Op.not]: null } }
+              ? { deleted_at: { [Op.not]: null } }
               : '',
           ],
         },

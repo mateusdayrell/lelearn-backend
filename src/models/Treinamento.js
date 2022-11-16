@@ -48,7 +48,7 @@ class Treinamento extends Model {
       {
         sequelize,
         paranoid: true,
-        deletedAt: 'daleted_at',
+        deletedAt: 'deleted_at',
       },
     );
     return this;

@@ -87,7 +87,7 @@ class Usuario extends Model {
         },
         sequelize,
         paranoid: true,
-        deletedAt: 'daleted_at',
+        deletedAt: 'deleted_at',
       },
     );
 

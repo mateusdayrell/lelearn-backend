@@ -290,7 +290,7 @@ class CursoController {
         `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
         (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
         (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${id} AND UV.cod_curso = c.cod_curso) as videos_assistidos
-         FROM cursos C WHERE C.daleted_at IS NULL ORDER BY C.nome_curso`,
+         FROM cursos C WHERE C.deleted_at IS NULL ORDER BY C.nome_curso`,
         { type: QueryTypes.SELECT },
       );
 
