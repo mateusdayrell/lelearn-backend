@@ -15,9 +15,8 @@ module.exports = {
     updatedAt: 'updated_at',
   },
   dialectOptoins: {
-    timezone: 'America/Sao_Paulo',
+    timezone: 'local',
   },
-  timezone: '-03:00',
   pool: {
     max: 5,
     min: 0,
