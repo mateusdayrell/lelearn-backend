@@ -85,7 +85,7 @@ module.exports = {
         });
       }
 
-      const usuario = await Usuario.findByPk(id);
+      const usuario = await Usuario.findByPk(id, { paranoid: false });
 
       if (!usuario) {
         return res.status(400).json({
@@ -93,7 +93,9 @@ module.exports = {
         });
       }
 
-      await usuario.destroy();
+      await usuario.destroy({
+        force: usuario.daleted_at !== null,
+      });
 
       return res.json(usuario); // também pode enviar null
     } catch (error) {
@@ -111,13 +113,18 @@ module.exports = {
       const cpf = urlParams.get('cpf');
       const nome = urlParams.get('nome');
       const tipo = urlParams.get('tipo');
+      const status = urlParams.get('status');
 
       const usuarios = await Usuario.findAll({
+        paranoid: status === 'ativo',
         where: {
           [Op.and]: [
             { cpf: { [Op.substring]: cpf } },
             { nome: { [Op.substring]: nome } },
             { tipo: { [Op.substring]: tipo } },
+            status === 'inativo'
+              ? { daleted_at: { [Op.not]: null } }
+              : '',
           ],
         },
         order: ['nome'],
