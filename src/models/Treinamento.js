@@ -23,6 +23,10 @@ class Treinamento extends Model {
           type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
+          unique: {
+            args: true,
+            msg: 'Nome do treinamento já cadastrado!',
+          },
           validate: {
             len: {
               args: [3, 30],

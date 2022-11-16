@@ -1,5 +1,4 @@
-const { Op, QueryTypes } = require('sequelize');
-const Curso = require('../models/Curso');
+const { QueryTypes } = require('sequelize');
 const Usuario = require('../models/Usuario');
 const TreinamentoUsuario = require('../models/TreinamentoUsuario');
 
@@ -197,30 +196,17 @@ module.exports = {
       const cpf = urlParams.get('cpf');
       const cod_curso = urlParams.get('cod_curso');
 
-      const treinamentos = await Treinamento.findAll({
-        where: {
-          [Op.and]: [
-            { nome_treinamento: { [Op.substring]: nome_treinamento } },
-          ],
-        },
-        include: [
-          {
-            model: Usuario,
-            as: 'usuarios',
-            where: {
-              cpf: cpf || { [Op.not]: null },
-            },
-          },
-          {
-            model: Curso,
-            as: 'cursos',
-            where: {
-              cod_curso: cod_curso || { [Op.not]: null },
-            },
-          },
-        ],
-        order: [['nome_treinamento'], ['usuarios', 'nome'], ['cursos', 'nome_curso']],
-      });
+      const treinamentos = await Treinamento.sequelize.query(
+        `SELECT T.cod_treinamento, T.nome_treinamento
+        FROM treinamentos T
+        WHERE
+        ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : ''}
+        ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
+        ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
+        ${cpf && cod_curso ? 'AND' : ''}
+        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento)` : ''}`,
+        { type: QueryTypes.SELECT },
+      );
 
       return res.json(treinamentos);
     } catch (error) {
@@ -241,23 +227,25 @@ module.exports = {
       }
 
       const treinamentosUsuarios = await Treinamento.sequelize.query(
-        `SELECT T.cod_treinamento, T.nome_treinamento,
+        `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento,
 
         (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1 WHERE (SELECT COUNT(CV.cod_video)
           FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
-          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = 13211615229)) as cursos_assistidos,
+          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id})) as cursos_assistidos,
 
-        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = 13211615229 AND UV.cod_curso IN
+        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
           (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
         as videos_assistidos,
 
         (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento)
-        as total_cursos
+        as total_cursos,
+
+        T.desc_treinamento, T.created_at
 
         FROM treinamentos T, treinamentos_usuarios TU
         WHERE T.daleted_at IS NULL AND
         TU.cod_treinamento = T.cod_treinamento AND
-        TU.cpf = 13211615229 ORDER BY T.nome_treinamento`,
+        TU.cpf = ${id} ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },
       );
 
@@ -267,18 +255,3 @@ module.exports = {
     }
   },
 };
-
-// `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento, T.created_at,
-
-// (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
-//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
-// as videos_assistidos,
-
-// (SELECT COUNT(CV.cod_video) FROM cursos_videos CV WHERE CV.cod_curso IN
-//   (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
-// as total_videos
-
-// FROM treinamentos T, treinamentos_usuarios TU
-// WHERE T.daleted_at IS NULL AND
-// TU.cod_treinamento = T.cod_treinamento AND
-// TU.cpf = ${id} ORDER BY T.nome_treinamento`
