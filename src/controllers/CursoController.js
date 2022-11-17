@@ -95,8 +95,14 @@ class CursoController {
       const curso = await Curso.findByPk(id);
 
       if (!curso) {
+        const desativado = await Curso.findByPk(id, { paranoid: false });
+        if (!desativado) {
+          return res.status(400).json({
+            erros: ['Curso não existe.'],
+          });
+        }
         return res.status(400).json({
-          erros: ['Curso não existe.'],
+          erros: ['O curso não pode ser editado pois está desativado.'],
         });
       }
 
@@ -198,7 +204,7 @@ class CursoController {
         });
       }
 
-      const curso = await Curso.findByPk(id);
+      const curso = await Curso.findByPk(id, { paranoid: false });
 
       if (!curso) {
         return res.status(400).json({
@@ -206,18 +212,55 @@ class CursoController {
         });
       }
 
-      if (curso.nome_arquivo) {
-        if (!apagarFotoCurso(curso.nome_arquivo)) {
+      const controle = curso.deleted_at !== null;
+
+      if (curso.nome_arquivo && controle) {
+        if (!apagarFotoCurso(curso.nome_arquivo)) { // apagar foto
           return res.status(400).json({
             erros: ['Erro ao excluir imagem'],
           });
         }
       }
 
-      await curso.setVideos(null);
-      await curso.destroy();
+      if (controle) await curso.setVideos(null); // remover videos
+
+      await curso.destroy({ // apagar curso
+        force: controle,
+      });
 
       return res.json(curso); // também pode enviar null
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  }
+
+  async activate(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do curso não enviado.'],
+        });
+      }
+
+      const [result] = await Curso.update(
+        { deleted_at: null },
+        {
+          where: { cod_curso: id },
+          paranoid: false,
+        },
+      );
+
+      if (result === 0) {
+        return res.status(400).json({
+          erros: ['Erro ao ativar curso.'],
+        });
+      }
+
+      return res.json(result);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
@@ -232,10 +275,17 @@ class CursoController {
 
       const nome_curso = urlParams.get('nome_curso');
       const cod_video = urlParams.get('cod_video');
+      const status = urlParams.get('status');
 
       const cursos = await Curso.findAll({
+        paranoid: status === 'ativo',
         where: {
-          nome_curso: { [Op.substring]: nome_curso },
+          [Op.and]: [
+            { nome_curso: { [Op.substring]: nome_curso } },
+            status === 'inativo'
+              ? { deleted_at: { [Op.not]: null } }
+              : '',
+          ],
         },
         include: [
           {
@@ -251,8 +301,9 @@ class CursoController {
 
       return res.json(cursos);
     } catch (error) {
-      console.log(error);
-      return error;
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   }
 

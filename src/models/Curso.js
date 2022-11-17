@@ -61,6 +61,8 @@ class Curso extends Model {
       },
       {
         sequelize,
+        paranoid: true,
+        deletedAt: 'deleted_at',
       },
     );
     return this;

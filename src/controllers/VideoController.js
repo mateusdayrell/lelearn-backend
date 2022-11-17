@@ -201,7 +201,7 @@ module.exports = {
         });
       }
 
-      const curso = await Curso.findByPk(id);
+      const curso = await Curso.findByPk(id, { paranoid: false });
 
       const videos = await curso.getVideos({ joinTableAttributes: ['ordem'] });
 

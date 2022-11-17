@@ -27,6 +27,7 @@ router.get('/usuarios/:id', usuarioController.show);
 router.get('/usuarios/search/:search', usuarioController.search);
 router.post('/usuarios/', usuarioController.store);
 router.put('/usuarios/:id', usuarioController.update);
+router.put('/usuarios/activate/:id', usuarioController.activate);
 router.delete('/usuarios/:id', usuarioController.destroy);
 
 router.get('/usuarios-videos/:cpf/:cod_curso', usuarioController.getVideos);
@@ -40,6 +41,7 @@ router.get('/cursos/get-by-video/:id', cursoController.getByVideo);
 router.get('/cursos/get-by-user/:id', cursoController.getByUsuario);
 router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
+router.put('/cursos/activate/:id', cursoController.activate);
 router.delete('/cursos/:id', cursoController.destroy);
 
 // VIDEOS

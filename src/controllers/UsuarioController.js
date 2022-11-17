@@ -113,6 +113,38 @@ module.exports = {
     }
   },
 
+  async activate(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      const [result] = await Usuario.update(
+        { deleted_at: null },
+        {
+          where: { cpf: id },
+          paranoid: false,
+        },
+      );
+
+      if (result === 0) {
+        return res.status(400).json({
+          erros: ['Erro ao ativar usuário.'],
+        });
+      }
+
+      return res.json(result);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
   async search(req, res) {
     try {
       const { search } = req.params;
