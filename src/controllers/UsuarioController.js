@@ -201,6 +201,72 @@ module.exports = {
     }
   },
 
+  async getCursos(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      const usuarioCursos = await UsuarioVideo.sequelize.query(
+        `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
+        (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
+        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${id} AND UV.cod_curso = c.cod_curso) as videos_assistidos
+         FROM cursos C WHERE C.deleted_at IS NULL ORDER BY C.nome_curso`,
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.json(usuarioCursos);
+    } catch (error) {
+      console.log(error);
+      return res.json(null);
+    }
+  },
+
+  async getTreinamentos(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
+      const treinamentosUsuarios = await Usuario.sequelize.query(
+        `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento,
+
+        (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1 WHERE (SELECT COUNT(CV.cod_video)
+          FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
+          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id})) as cursos_assistidos,
+
+        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
+          (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
+        as videos_assistidos,
+
+        (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento)
+        as total_cursos,
+
+        T.desc_treinamento, T.created_at
+
+        FROM treinamentos T, treinamentos_usuarios TU
+        WHERE T.deleted_at IS NULL AND
+        TU.cod_treinamento = T.cod_treinamento AND
+        TU.cpf = ${id} ORDER BY T.nome_treinamento`,
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.json(treinamentosUsuarios);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
   async updateVideo(req, res) {
     try {
       const { cpf, cod_video, cod_curso } = req.params;

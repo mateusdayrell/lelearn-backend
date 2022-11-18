@@ -238,23 +238,25 @@ module.exports = {
     }
   },
 
-  async getByCurso(req, res) {
+  async getCursos(req, res) {
     try {
       const { id } = req.params;
 
       if (!id) {
         return res.status(400).json({
-          erros: ['Curso não enviado.'],
+          erros: ['Video não enviado.'],
         });
       }
 
-      const curso = await Curso.findByPk(id, { paranoid: false });
+      const video = await Video.findByPk(id, { paranoid: false });
 
-      const videos = await curso.getVideos({ joinTableAttributes: ['ordem'] });
+      const cursos = await video.getCursos();
 
-      return res.json(videos);
+      return res.json(cursos);
     } catch (error) {
-      return res.json(null);
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   },
 };

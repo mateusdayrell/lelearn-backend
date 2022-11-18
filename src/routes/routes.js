@@ -25,20 +25,20 @@ router.post('/send-reset-password/:cpf', tokenController.resetPassword);
 router.get('/usuarios/', usuarioController.index);
 router.get('/usuarios/:id', usuarioController.show);
 router.get('/usuarios/search/:search', usuarioController.search);
+router.get('/usuarios/get-cursos/:id', usuarioController.getCursos);
+router.get('/usuarios/get-treinamentos/:id', usuarioController.getTreinamentos);
+router.get('/usuarios-videos/:cpf/:cod_curso', usuarioController.getVideos);
 router.post('/usuarios/', usuarioController.store);
 router.put('/usuarios/:id', usuarioController.update);
 router.put('/usuarios/activate/:id', usuarioController.activate);
 router.delete('/usuarios/:id', usuarioController.destroy);
-
-router.get('/usuarios-videos/:cpf/:cod_curso', usuarioController.getVideos);
 router.put('/usuarios-videos/:cpf/:cod_curso/:cod_video', usuarioController.updateVideo);
 
 // CURSOS
 router.get('/cursos/', cursoController.index);
 router.get('/cursos/:id', cursoController.show);
 router.get('/cursos/search/:search', cursoController.search);
-router.get('/cursos/get-by-video/:id', cursoController.getByVideo);
-router.get('/cursos/get-by-user/:id', cursoController.getByUsuario);
+router.get('/cursos/get-videos/:id', cursoController.getVideos);
 router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
 router.put('/cursos/activate/:id', cursoController.activate);
@@ -47,7 +47,7 @@ router.delete('/cursos/:id', cursoController.destroy);
 // VIDEOS
 router.get('/videos/', videoController.index);
 router.get('/videos/:id', videoController.show);
-router.get('/videos/get-by-curso/:id', videoController.getByCurso);
+router.get('/videos/get-cursos/:id', videoController.getCursos);
 router.get('/videos/search/:search', videoController.search);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
@@ -55,16 +55,12 @@ router.put('/videos/activate/:id', videoController.activate);
 router.delete('/videos/:id', videoController.destroy);
 
 // CURSO-VIDEO
-// router.get('/curso-video/', cursoVideoController.index);
-// router.get('/curso-video/cursos', cursoVideoController.getCursos);
-// router.get('/curso-video/videos', cursoVideoController.getVideos);
 router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS
 router.get('/treinamentos/', treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
 router.get('/treinamentos/search/:search', treinamentoController.search);
-router.get('/treinamentos/get-by-usuario/:id', treinamentoController.getByUsuario);
 router.get('/treinamentos/get-cursos-usuario/:id/:cpf', treinamentoController.getCursosDoUsuario);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);

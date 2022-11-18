@@ -1,11 +1,10 @@
-import { Op, QueryTypes } from 'sequelize';
+import { Op } from 'sequelize';
 
 import Curso from '../models/Curso';
 import Video from '../models/Video';
 import upload from '../services/multer';
 import { apagarFotoCurso } from '../helpers/CursoHelper';
 import CursoVideo from '../models/CursoVideo';
-import UsuarioVideo from '../models/UsuarioVideo';
 
 class CursoController {
   async index(req, res) {
@@ -307,47 +306,22 @@ class CursoController {
     }
   }
 
-  async getByVideo(req, res) {
+  async getVideos(req, res) {
     try {
       const { id } = req.params;
 
       if (!id) {
         return res.status(400).json({
-          erros: ['Video não enviado.'],
+          erros: ['Curso não enviado.'],
         });
       }
 
-      const video = await Video.findByPk(id);
+      const curso = await Curso.findByPk(id, { paranoid: false });
 
-      const cursos = await video.getCursos();
+      const videos = await curso.getVideos({ joinTableAttributes: ['ordem'] });
 
-      return res.json(cursos);
+      return res.json(videos);
     } catch (error) {
-      return res.json(null);
-    }
-  }
-
-  async getByUsuario(req, res) {
-    try {
-      const { id } = req.params;
-
-      if (!id) {
-        return res.status(400).json({
-          erros: ['CPF não enviado.'],
-        });
-      }
-
-      const usuarioCursos = await UsuarioVideo.sequelize.query(
-        `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
-        (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
-        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${id} AND UV.cod_curso = c.cod_curso) as videos_assistidos
-         FROM cursos C WHERE C.deleted_at IS NULL ORDER BY C.nome_curso`,
-        { type: QueryTypes.SELECT },
-      );
-
-      return res.json(usuarioCursos);
-    } catch (error) {
-      console.log(error);
       return res.json(null);
     }
   }
