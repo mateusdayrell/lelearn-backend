@@ -65,6 +65,7 @@ router.get('/treinamentos/', treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
 router.get('/treinamentos/search/:search', treinamentoController.search);
 router.get('/treinamentos/get-by-usuario/:id', treinamentoController.getByUsuario);
+router.get('/treinamentos/get-cursos-usuario/:id/:cpf', treinamentoController.getCursosDoUsuario);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);
 router.put('/treinamentos/activate/:id', treinamentoController.activate);

@@ -262,6 +262,34 @@ module.exports = {
     }
   },
 
+  async getCursosDoUsuario(req, res) {
+    try {
+      const { id, cpf } = req.params;
+
+      if (!id || !cpf) {
+        return res.status(400).json({
+          erros: ['Parametros incorretos ou incompletos.'],
+        });
+      }
+
+      const usuarioCursos = await Treinamento.sequelize.query(
+        `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
+        (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
+        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${cpf} AND UV.cod_curso = c.cod_curso) as videos_assistidos
+         FROM cursos C, treinamentos_cursos TC
+         WHERE C.deleted_at IS NULL AND
+         TC.cod_treinamento = ${id} AND
+         TC.cod_curso = C.cod_curso
+         ORDER BY C.nome_curso`,
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.json(usuarioCursos);
+    } catch (error) {
+      return res.json(null);
+    }
+  },
+
   async getByUsuario(req, res) {
     try {
       const { id } = req.params;
