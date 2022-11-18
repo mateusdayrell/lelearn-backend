@@ -97,8 +97,14 @@ module.exports = {
       const treinamento = await Treinamento.findByPk(id);
 
       if (!treinamento) {
+        const desativado = await Treinamento.findByPk(id, { paranoid: false });
+        if (!desativado) {
+          return res.status(400).json({
+            erros: ['Treinamento não existe.'],
+          });
+        }
         return res.status(400).json({
-          erros: ['Treinamento não existe.'],
+          erros: ['O treinamento não pode ser editado pois está desativado.'],
         });
       }
 
@@ -167,7 +173,7 @@ module.exports = {
         });
       }
 
-      const treinamento = await Treinamento.findByPk(id);
+      const treinamento = await Treinamento.findByPk(id, { paranoid: false });
 
       if (!treinamento) {
         return res.status(400).json({
@@ -175,11 +181,48 @@ module.exports = {
         });
       }
 
-      await treinamento.setCursos(null);
-      await treinamento.setUsuarios(null);
-      await treinamento.destroy();
+      const controle = treinamento.deleted_at !== null;
+
+      if (controle) {
+        await treinamento.setCursos(null);
+        await treinamento.setUsuarios(null);
+      }
+
+      await treinamento.destroy({ force: controle });
 
       return res.json(treinamento); // também pode enviar null
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async activate(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do treinamento não enviado.'],
+        });
+      }
+
+      const [result] = await Treinamento.update(
+        { deleted_at: null },
+        {
+          where: { cod_treinamento: id },
+          paranoid: false,
+        },
+      );
+
+      if (result === 0) {
+        return res.status(400).json({
+          erros: ['Erro ao ativar treicod_treinamento.'],
+        });
+      }
+
+      return res.json(result);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
@@ -195,16 +238,19 @@ module.exports = {
       const nome_treinamento = urlParams.get('nome_treinamento');
       const cpf = urlParams.get('cpf');
       const cod_curso = urlParams.get('cod_curso');
+      const status = urlParams.get('status');
 
       const treinamentos = await Treinamento.sequelize.query(
         `SELECT T.cod_treinamento, T.nome_treinamento
         FROM treinamentos T
-        WHERE T.deleted_at IS NULL AND
+        WHERE
         ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : ''}
         ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
         ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
         ${cpf && cod_curso ? 'AND' : ''}
-        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento)` : ''}`,
+        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento) ` : ' '}
+        ${cod_curso && status && status !== 'ambos' ? 'AND' : ''}
+        ${status === 'inativo' ? ' T.deleted_at != NULL ' : ' T.deleted_at IS NULL '}`,
         { type: QueryTypes.SELECT },
       );
 

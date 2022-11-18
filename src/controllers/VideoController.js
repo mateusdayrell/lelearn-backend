@@ -86,6 +86,12 @@ module.exports = {
       const video = await Video.findByPk(id);
 
       if (!video) {
+        const desativado = await Video.findByPk(id, { paranoid: false });
+        if (!desativado) {
+          return res.status(400).json({
+            erros: ['O vídeo não pode ser editado pois está desativado.'],
+          });
+        }
         return res.status(400).json({
           erros: ['Vídeo não existe.'],
         });
@@ -110,9 +116,6 @@ module.exports = {
           if (err.message === 'PRIMARY must be unique') {
             return res.json('Código do vídeo já cadastrado');
           }
-          if (err.message === 'titulo_video must be unique') {
-            err.message = 'Título já cadastrado!';
-          }
           return err.message;
         }),
       });
@@ -129,7 +132,7 @@ module.exports = {
         });
       }
 
-      const video = await Video.findByPk(id);
+      const video = await Video.findByPk(id, { paranoid: false });
 
       if (!video) {
         return res.status(400).json({
@@ -137,9 +140,43 @@ module.exports = {
         });
       }
 
-      await video.destroy();
+      const controle = video.deleted_at !== null;
+
+      await video.destroy({ force: controle });
 
       return res.json(video); // também pode enviar null
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async activate(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do vídeo não enviado.'],
+        });
+      }
+
+      const [result] = await Video.update(
+        { deleted_at: null },
+        {
+          where: { cod_video: id },
+          paranoid: false,
+        },
+      );
+
+      if (result === 0) {
+        return res.status(400).json({
+          erros: ['Erro ao ativar vídeo.'],
+        });
+      }
+
+      return res.json(result);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
@@ -154,13 +191,18 @@ module.exports = {
 
       const titulo_video = urlParams.get('titulo_video');
       const cod_curso = urlParams.get('cod_curso');
+      const status = urlParams.get('status');
 
       const videos = await Video.findAll(
         cod_curso
           ? {
+            paranoid: status === 'ativo',
             where: {
               [Op.and]: [
                 { titulo_video: { [Op.substring]: titulo_video } },
+                status === 'inativo'
+                  ? { deleted_at: { [Op.not]: null } }
+                  : '',
               ],
             },
             include: [
@@ -175,9 +217,13 @@ module.exports = {
             order: [['titulo_video'], ['cursos', 'nome_curso']],
           }
           : {
+            paranoid: status === 'ativo',
             where: {
               [Op.and]: [
                 { titulo_video: { [Op.substring]: titulo_video } },
+                status === 'inativo'
+                  ? { deleted_at: { [Op.not]: null } }
+                  : '',
               ],
             },
             order: ['titulo_video'],
@@ -186,8 +232,9 @@ module.exports = {
 
       return res.json(videos);
     } catch (error) {
-      console.log(error);
-      return error;
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   },
 

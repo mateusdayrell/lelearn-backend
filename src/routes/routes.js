@@ -51,6 +51,7 @@ router.get('/videos/get-by-curso/:id', videoController.getByCurso);
 router.get('/videos/search/:search', videoController.search);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
+router.put('/videos/activate/:id', videoController.activate);
 router.delete('/videos/:id', videoController.destroy);
 
 // CURSO-VIDEO
@@ -66,6 +67,7 @@ router.get('/treinamentos/search/:search', treinamentoController.search);
 router.get('/treinamentos/get-by-usuario/:id', treinamentoController.getByUsuario);
 router.post('/treinamentos/', treinamentoController.store);
 router.put('/treinamentos/:id', treinamentoController.update);
+router.put('/treinamentos/activate/:id', treinamentoController.activate);
 router.delete('/treinamentos/:id', treinamentoController.destroy);
 
 // COMENTARIOS
