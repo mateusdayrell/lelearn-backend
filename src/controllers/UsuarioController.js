@@ -242,7 +242,7 @@ module.exports = {
         (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1, cursos C1 WHERE (SELECT COUNT(CV.cod_video)
           FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
           FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id}) AND
-          C1.cod_curso = T1.cod_curso AND C1.deleted_at IS NULL) as cursos_assistidos,
+          C1.cod_curso = T1.cod_curso AND C1.deleted_at IS NULL AND T1.cod_treinamento = T.cod_treinamento) as cursos_assistidos,
 
         (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC, cursos C WHERE TC.cod_treinamento = T.cod_treinamento AND
         TC.cod_curso = C.cod_curso AND C.deleted_at IS NULL)
