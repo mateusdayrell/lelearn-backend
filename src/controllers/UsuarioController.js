@@ -239,15 +239,13 @@ module.exports = {
       const treinamentosUsuarios = await Usuario.sequelize.query(
         `SELECT T.cod_treinamento, T.nome_treinamento, TU.prazo, T.desc_treinamento,
 
-        (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1 WHERE (SELECT COUNT(CV.cod_video)
+        (SELECT COUNT(T1.cod_curso) FROM treinamentos_cursos T1, cursos C1 WHERE (SELECT COUNT(CV.cod_video)
           FROM cursos_videos CV WHERE CV.cod_curso = T1.cod_curso) = (SELECT COUNT(UV1.cod_video)
-          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id})) as cursos_assistidos,
+          FROM usuarios_videos UV1 WHERE UV1.cod_curso = T1.cod_curso AND UV1.cpf = ${id}) AND
+          C1.cod_curso = T1.cod_curso AND C1.deleted_at IS NULL) as cursos_assistidos,
 
-        (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN
-          (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
-        as videos_assistidos,
-
-        (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento)
+        (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC, cursos C WHERE TC.cod_treinamento = T.cod_treinamento AND
+        TC.cod_curso = C.cod_curso AND C.deleted_at IS NULL)
         as total_cursos,
 
         T.desc_treinamento, T.created_at
@@ -258,6 +256,10 @@ module.exports = {
         TU.cpf = ${id} ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },
       );
+
+      // eslint-disable-next-line max-len
+      //   (SELECT COUNT(UV.cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso IN  // (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = T.cod_treinamento))
+      // as videos_assistidos,
 
       return res.json(treinamentosUsuarios);
     } catch (error) {
