@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const Video = require('../models/Video');
 const Curso = require('../models/Curso');
 const Comentario = require('../models/Comentario');
+const CursoVideo = require('../models/CursoVideo');
 
 module.exports = {
   async index(req, res) {
@@ -257,6 +258,57 @@ module.exports = {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
+    }
+  },
+
+  async getByCurso(req, res) {
+    try {
+      const { cod_curso, cod_video } = req.params;
+
+      if (!cod_curso) {
+        return res.status(400).json({
+          erros: ['Código do curso não enviado.'],
+        });
+      }
+
+      if (!cod_video) {
+        return res.status(400).json({
+          erros: ['Código do vídeo não enviado.'],
+        });
+      }
+
+      const cursoVideo = await CursoVideo.findOne({
+        where: req.params,
+        include: [
+          {
+            model: Curso,
+            as: 'curso',
+            include: [
+              {
+                model: Video,
+                as: 'videos',
+                attributes: ['cod_video', 'titulo_video'],
+                through: { attributes: ['ordem', 'cod_curso'] },
+              },
+            ],
+          },
+          {
+            model: Video,
+            as: 'video',
+            // include: [
+            //   {
+            //     model: Comentario,
+            //     as: 'comentarios',
+            //     order: ['comentarios', 'created_at', 'DESC'],
+            //   },
+            // ],
+          },
+        ],
+      });
+
+      return res.json(cursoVideo);
+    } catch (error) {
+      return res.json(null);
     }
   },
 };
