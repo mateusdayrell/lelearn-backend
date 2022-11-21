@@ -1,3 +1,4 @@
+const { fn, col } = require('sequelize');
 const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
 const Video = require('../models/Video');
@@ -110,6 +111,66 @@ module.exports = {
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async getRootComments(req, res) {
+    try {
+      const { cod_video } = req.params;
+
+      if (!cod_video) {
+        return res.status(400).json({
+          erros: ['Código do vídeo não enviado.'],
+        });
+      }
+
+      const comentarios = await Comentario.findAll({
+        where: {
+          cod_video, comentario_pai: null,
+        },
+        attributes: {
+          include: [[fn('COUNT', col('respostas.cod_comentario')), 'respostas_qtd']],
+        },
+        include: [
+          { model: Comentario, as: 'respostas', attributes: [] },
+          { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+        ],
+        order: [['cod_comentario', 'ASC']],
+        group: ['cod_comentario'],
+      });
+
+      return res.json(comentarios); // também pode enviar null
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({
+        erros: error, // error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async getRepplyes(req, res) {
+    try {
+      const { cod_comentario } = req.params;
+
+      if (!cod_comentario) {
+        return res.status(400).json({
+          erros: ['Código do comentário não enviado.'],
+        });
+      }
+
+      const comentarios = await Comentario.findAll({
+        where: {
+          comentario_pai: cod_comentario,
+        },
+        order: [['created_at', 'ASC']],
+      });
+
+      return res.json(comentarios); // também pode enviar null
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({
+        erros: error, // error.errors.map((err) => err.message),
       });
     }
   },

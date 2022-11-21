@@ -13,7 +13,7 @@ import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
 // import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 // import treinamentoCursoController from '../controllers/TreinamentoCursoController';
-import cursoVideoController from '../controllers/CursoVideoController';
+// import cursoVideoController from '../controllers/CursoVideoController';
 
 const router = new Router();
 
@@ -48,6 +48,7 @@ router.delete('/cursos/:id', cursoController.destroy);
 router.get('/videos/', videoController.index);
 router.get('/videos/:id', videoController.show);
 router.get('/videos/get-cursos/:id', videoController.getCursos);
+router.get('/videos/get-by-curso/:cod_curso/:cod_video', videoController.getByCurso);
 router.get('/videos/search/:search', videoController.search);
 router.post('/videos/', videoController.store);
 router.put('/videos/:id', videoController.update);
@@ -55,7 +56,7 @@ router.put('/videos/activate/:id', videoController.activate);
 router.delete('/videos/:id', videoController.destroy);
 
 // CURSO-VIDEO
-router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
+// router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS
 router.get('/treinamentos/', treinamentoController.index);
@@ -73,6 +74,9 @@ router.get('/comentarios/:id', comentarioController.show);
 router.post('/comentarios/', comentarioController.store);
 router.put('/comentarios/:id', comentarioController.update);
 router.delete('/comentarios/:id', comentarioController.destroy);
+
+router.get('/comentarios/root/:cod_video', comentarioController.getRootComments);
+router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepplyes);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
