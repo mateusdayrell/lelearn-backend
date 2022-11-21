@@ -11,6 +11,10 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      cor: {
+        type: Sequelize.STRING(7),
+        allowNull: false,
+      },
       desc_treinamento: {
         type: Sequelize.STRING(150),
         allowNull: true,

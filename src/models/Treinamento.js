@@ -34,6 +34,16 @@ class Treinamento extends Model {
             },
           },
         },
+        cor: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            len: {
+              args: [4, 7],
+              msg: 'A descrição do treinamento deve ter entre 4 e 7 caracteres.',
+            },
+          },
+        },
         desc_treinamento: {
           type: DataTypes.STRING,
           allowNull: true,
