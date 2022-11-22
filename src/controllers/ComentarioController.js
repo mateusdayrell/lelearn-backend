@@ -136,7 +136,7 @@ module.exports = {
           { model: Comentario, as: 'respostas', attributes: [] },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         ],
-        order: [['cod_comentario', 'ASC']],
+        order: [['cod_comentario', 'DESC']],
         group: ['cod_comentario'],
       });
 
