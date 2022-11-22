@@ -251,7 +251,7 @@ module.exports = {
         ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
         ${cpf && cod_curso ? 'AND' : ''}
         ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento) ` : ' '}
-        ${cod_curso && status && status !== 'ambos' ? 'AND' : ''}
+        ${(nome_treinamento || cpf || cod_curso) && status && status !== 'ambos' ? 'AND' : ''}
         ${status === 'inativo' ? ' T.deleted_at IS NOT NULL ' : status === 'ativo' ? ' T.deleted_at IS NULL ' : ''}
         ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },
