@@ -40,6 +40,10 @@ module.exports = {
         type: Sequelize.STRING(150),
         allowNull: false,
       },
+      resolvido: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

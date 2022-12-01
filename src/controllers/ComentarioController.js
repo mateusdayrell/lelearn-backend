@@ -1,20 +1,42 @@
 const { fn, col } = require('sequelize');
+const sequelize = require('sequelize');
 const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
 const Video = require('../models/Video');
+const Curso = require('../models/Curso');
 
 module.exports = {
   async index(req, res) {
     try {
-      const comentarios = await Comentario.findAll();
+      const comentarios = await Comentario.findAll({
+        where: {
+          comentario_pai: null,
+        },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+          ],
+        },
+        include: [
+          { model: Comentario, as: 'respostas' },
+          { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
+        ],
+        order: [['created_at', 'ASC']],
+      });
       return res.json(comentarios);
     } catch (error) {
-      return res.json(null);
+      console.log(error);
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   },
 
   async show(req, res) {
     try {
+      console.log('entrou');
       const { id } = req.params;
 
       if (!id) {
@@ -23,11 +45,23 @@ module.exports = {
         });
       }
 
-      const comentario = await Comentario.findByPk(id);
+      const comentario = await Comentario.findByPk(id, {
+        include: [
+          { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          {
+            model: Comentario,
+            as: 'respostas',
+            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          },
+        ],
+        order: [['respostas', 'created_at', 'ASC']],
+      });
 
       return res.json(comentario);
     } catch (error) {
-      return res.json(null);
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
     }
   },
 
@@ -42,7 +76,6 @@ module.exports = {
       }
 
       const novoComentario = await Comentario.create(req.body);
-
       return res.json(novoComentario);
     } catch (error) {
       return res.status(400).json({
@@ -136,7 +169,7 @@ module.exports = {
           { model: Comentario, as: 'respostas', attributes: [] },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         ],
-        order: [['cod_comentario', 'DESC']],
+        order: [['created_at', 'DESC']],
         group: ['cod_comentario'],
       });
 
@@ -163,6 +196,7 @@ module.exports = {
         where: {
           comentario_pai: cod_comentario,
         },
+        include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         order: [['created_at', 'ASC']],
       });
 

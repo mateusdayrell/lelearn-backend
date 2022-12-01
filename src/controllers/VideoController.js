@@ -200,7 +200,7 @@ module.exports = {
             paranoid: status === 'ativo',
             where: {
               [Op.and]: [
-                { titulo_video: { [Op.substring]: titulo_video } },
+                titulo_video && { titulo_video: { [Op.substring]: titulo_video } },
                 status === 'inativo'
                   ? { deleted_at: { [Op.not]: null } }
                   : '',
@@ -221,7 +221,7 @@ module.exports = {
             paranoid: status === 'ativo',
             where: {
               [Op.and]: [
-                { titulo_video: { [Op.substring]: titulo_video } },
+                titulo_video && { titulo_video: { [Op.substring]: titulo_video } },
                 status === 'inativo'
                   ? { deleted_at: { [Op.not]: null } }
                   : '',
@@ -230,7 +230,7 @@ module.exports = {
             order: ['titulo_video'],
           },
       );
-
+      console.log(videos);
       return res.json(videos);
     } catch (error) {
       return res.status(400).json({
