@@ -71,6 +71,7 @@ router.delete('/treinamentos/:id', treinamentoController.destroy);
 // COMENTARIOS
 router.get('/comentarios/', comentarioController.index);
 router.get('/comentarios/:id', comentarioController.show);
+router.get('/comentarios/search/:search', comentarioController.search);
 router.post('/comentarios/', comentarioController.store);
 router.put('/comentarios/:id', comentarioController.update);
 router.delete('/comentarios/:id', comentarioController.destroy);

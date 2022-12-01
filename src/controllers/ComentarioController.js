@@ -1,4 +1,4 @@
-const { fn, col } = require('sequelize');
+const { fn, col, Op } = require('sequelize');
 const sequelize = require('sequelize');
 const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
@@ -205,6 +205,47 @@ module.exports = {
       console.log(error);
       return res.status(400).json({
         erros: error, // error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async search(req, res) {
+    try {
+      const { search } = req.params;
+      const urlParams = new URLSearchParams(search);
+
+      const texto = urlParams.get('texto');
+      const cod_video = urlParams.get('cod_video');
+      const videos = urlParams.get('videos');
+      const cpf = urlParams.get('cpf');
+
+      const comentarios = await Comentario.findAll({
+        where: {
+          [Op.and]: [
+            texto && { texto: { [Op.substring]: texto } },
+            cpf && { cpf },
+            cod_video && { cod_video },
+            (!cod_video && videos.length > 0) && { cod_video: { [Op.or]: videos.split(',') } },
+          ],
+        },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+          ],
+        },
+        include: [
+          { model: Comentario, as: 'respostas' },
+          { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
+        ],
+        order: [['created_at', 'ASC']],
+      });
+
+      return res.json(comentarios);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
       });
     }
   },
