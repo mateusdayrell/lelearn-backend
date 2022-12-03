@@ -19,11 +19,11 @@ module.exports = {
           ],
         },
         include: [
-          { model: Comentario, as: 'respostas' },
+          { model: Comentario, as: 'respostas', include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: [['created_at', 'ASC']],
+        order: [['created_at', 'DESC'], ['respostas', 'created_at', 'ASC']],
       });
       return res.json(comentarios);
     } catch (error) {
@@ -36,7 +36,6 @@ module.exports = {
 
   async show(req, res) {
     try {
-      console.log('entrou');
       const { id } = req.params;
 
       if (!id) {
@@ -46,6 +45,12 @@ module.exports = {
       }
 
       const comentario = await Comentario.findByPk(id, {
+        attributes: {
+          include: [
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = ${id})`), 'respostas_total'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = ${id} AND resolvido = 0)`), 'respostas_pendentes'],
+          ],
+        },
         include: [
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           {
@@ -53,6 +58,7 @@ module.exports = {
             as: 'respostas',
             include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           },
+          { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
         order: [['respostas', 'created_at', 'ASC']],
       });
