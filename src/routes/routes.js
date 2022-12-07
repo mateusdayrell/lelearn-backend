@@ -2,7 +2,7 @@
 import { Router } from 'express';
 
 // MIDDLEWARES
-// import loginRequired from '../middlewares/loginRequired';
+import loginRequired from '../middlewares/loginRequired';
 
 // CONTROLLERS
 import tokenController from '../controllers/TokenController';
@@ -11,6 +11,7 @@ import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
+import pdfController from '../controllers/PdfController';
 // import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 // import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 // import cursoVideoController from '../controllers/CursoVideoController';
@@ -22,7 +23,7 @@ router.post('/tokens', tokenController.store);
 router.post('/send-reset-password/:cpf', tokenController.resetPassword);
 
 // USUÁRIOS
-router.get('/usuarios/', usuarioController.index);
+router.get('/usuarios/', loginRequired, usuarioController.index);
 router.get('/usuarios/:id', usuarioController.show);
 router.get('/usuarios/search/:search', usuarioController.search);
 router.get('/usuarios/get-cursos/:id', usuarioController.getCursos);
@@ -78,6 +79,9 @@ router.delete('/comentarios/:id', comentarioController.destroy);
 
 router.get('/comentarios/root/:cod_video', comentarioController.getRootComments);
 router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepplyes);
+
+router.get('/pdf', pdfController.treinamentosUsuarios);
+router.post('/pdf', pdfController.teste);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
