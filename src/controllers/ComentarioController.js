@@ -47,8 +47,8 @@ module.exports = {
       const comentario = await Comentario.findByPk(id, {
         attributes: {
           include: [
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = ${id})`), 'respostas_total'],
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = ${id} AND resolvido = 0)`), 'respostas_pendentes'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios WHERE comentarios.comentario_pai  = '${id}')`), 'respostas_total'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios WHERE comentarios.comentario_pai = '${id}' AND resolvido = 0)`), 'respostas_pendentes'],
           ],
         },
         include: [
