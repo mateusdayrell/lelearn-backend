@@ -1,7 +1,10 @@
 import PdfPrinter from 'pdfmake';
+import sequelize from 'sequelize';
+import Curso from '../models/Curso';
 import Video from '../models/Video';
+import Treinamento from '../models/Treinamento';
 
-class PdfController {
+class RelatorioController {
   async treinamentosUsuarios(req, res) {
     const videos = await Video.findAll({
       order: [['titulo_video']],
@@ -18,12 +21,12 @@ class PdfController {
     const printer = new PdfPrinter(fonts);
     const body = [];
 
-    for await (const vid of videos) {
+    videos.forEach((vid) => {
       const rows = [];
       rows.push(vid.cod_video);
       rows.push(vid.titulo_video);
       body.push(rows);
-    }
+    });
 
     const docDefinitions = {
       defaultStyle: { font: 'Helvetica' },
@@ -62,6 +65,36 @@ class PdfController {
       res.send(`ERROR:${error}`);
     });
   }
+
+  async cursos(req, res) {
+    try {
+      const cursos = await Curso.findAll({
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`)'), 'videos_qtd'],
+            [sequelize.literal('(SELECT COUNT(cod_treinamento) FROM treinamentos_cursos TC WHERE TC.cod_curso = `Curso`.`cod_curso`)'), 'treinamentos_qtd'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT(cpf)) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso`)'), 'alcance_usuarios'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`))'), 'comentarios_qtd'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`) AND C.resolvido = 1)'), 'comentarios_resolvidos_qtd'],
+          ],
+        },
+        include: [
+          {
+            model: Video,
+            as: 'videos',
+          },
+          {
+            model: Treinamento,
+            as: 'treinamentos',
+          },
+        ],
+      });
+      return res.json(cursos);
+    } catch (error) {
+      console.log(error);
+      return res.json(error);
+    }
+  }
 }
 
 function createPdfBinary(callback) {
@@ -97,4 +130,4 @@ function createPdfBinary(callback) {
   doc.end();
 }
 
-export default new PdfController();
+export default new RelatorioController();

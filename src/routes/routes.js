@@ -11,7 +11,7 @@ import cursoController from '../controllers/CursoController';
 import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
-import pdfController from '../controllers/PdfController';
+import relatorioController from '../controllers/RelatorioController';
 // import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 // import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 // import cursoVideoController from '../controllers/CursoVideoController';
@@ -80,8 +80,9 @@ router.delete('/comentarios/:id', comentarioController.destroy);
 router.get('/comentarios/root/:cod_video', comentarioController.getRootComments);
 router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepplyes);
 
-router.get('/pdf', pdfController.treinamentosUsuarios);
-router.post('/pdf', pdfController.teste);
+router.get('/relatorios/treinamentos', relatorioController.treinamentosUsuarios);
+router.get('/relatorios/cursos', relatorioController.cursos);
+router.post('/relatorios/teste', relatorioController.teste);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
