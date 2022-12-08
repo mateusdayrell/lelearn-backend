@@ -29,7 +29,6 @@ const validateBody = async (body, res, update) => {
 
     if (body.cpf) {
       const usuario = await Usuario.findByPk(body.cpf);
-      console.log(usuario);
       if (!usuario) {
         erros.push(`Usuário não existe teste. ${body.cpf}, 00000000007`);
       }

@@ -59,7 +59,6 @@ class RelatorioController {
   criaPdf(req, res) {
     // eslint-disable-next-line no-use-before-define
     createPdfBinary((binary) => {
-      console.log('foi');
       res.contentType('application/pdf');
       res.send(binary);
     }, (error) => {

@@ -33,14 +33,6 @@ class TreinamentoUsuario extends Model {
           allowNull: false,
           defaultValue: 0,
         },
-        testando: {
-          type: DataTypes.VIRTUAL,
-          // eslint-disable-next-line consistent-return
-          get() {
-            console.log(this);
-            return 'TESTE';
-          },
-        },
       },
       {
         sequelize,
