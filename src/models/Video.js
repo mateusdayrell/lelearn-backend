@@ -75,11 +75,13 @@ class Video extends Model {
       through: 'usuarios_videos',
       as: 'usuarios',
       foreignKey: 'cod_video',
+      hooks: true,
     });
     this.belongsToMany(models.Curso, {
       through: 'cursos_videos',
       as: 'cursos',
       foreignKey: 'cod_video',
+      hooks: true,
     });
   }
 }

@@ -44,6 +44,11 @@ class Curso extends Model {
             },
           },
         },
+        videos_qtd: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
         nome_arquivo: {
           type: DataTypes.STRING,
           defaultValue: '',
@@ -79,15 +84,15 @@ class Curso extends Model {
       through: 'cursos_videos',
       as: 'videos',
       foreignKey: 'cod_curso',
+      hooks: true,
     });
 
     this.belongsToMany(models.Usuario, {
       through: 'usuarios_videos',
       as: 'usuarios',
       foreignKey: 'cod_curso',
+      hooks: true,
     });
-
-    // this.hasMany(models.Video, { as: 'videos', foreignKey: 'cod_curso' });
   }
 }
 

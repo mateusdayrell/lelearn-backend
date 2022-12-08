@@ -19,6 +19,11 @@ module.exports = {
         type: Sequelize.STRING(23),
         allowNull: true,
       },
+      videos_qtd: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
