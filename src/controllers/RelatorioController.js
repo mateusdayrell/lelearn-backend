@@ -3,9 +3,10 @@ import sequelize from 'sequelize';
 import Curso from '../models/Curso';
 import Video from '../models/Video';
 import Treinamento from '../models/Treinamento';
+import Usuario from '../models/Usuario';
 
 class RelatorioController {
-  async treinamentosUsuarios(req, res) {
+  async teste(req, res) {
     const videos = await Video.findAll({
       order: [['titulo_video']],
     });
@@ -55,7 +56,7 @@ class RelatorioController {
     });
   }
 
-  teste(req, res) {
+  criaPdf(req, res) {
     // eslint-disable-next-line no-use-before-define
     createPdfBinary((binary) => {
       console.log('foi');
@@ -90,6 +91,49 @@ class RelatorioController {
         ],
       });
       return res.json(cursos);
+    } catch (error) {
+      console.log(error);
+      return res.json(error);
+    }
+  }
+
+  async treinamentos(req, res) {
+    try {
+      const treinamentos = await Treinamento.findAll({
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(cpf) FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = `Treinamento`.`cod_treinamento`)'), 'total_usuarios'],
+            [sequelize.literal('(SELECT COUNT(cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)'), 'total_cursos'],
+            [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`))'), 'total_videos'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)))'), 'total_comentarios'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)) AND C.resolvido = 1)'), 'total_comentarios_resolvidos'],
+          ],
+        },
+        include: [
+          {
+            model: Curso,
+            as: 'cursos',
+            attributes: {
+              include: [
+                [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `cursos`.`cod_curso`)'), 'total_videos'],
+              ],
+            },
+          },
+          {
+            model: Usuario,
+            as: 'usuarios',
+            attributes: {
+              include: [
+                [sequelize.literal('(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`))'), 'videos_assistidos'],
+              ],
+            },
+            through: {
+              attributes: ['prazo', 'testando'],
+            },
+          },
+        ],
+      });
+      return res.json(treinamentos);
     } catch (error) {
       console.log(error);
       return res.json(error);

@@ -80,9 +80,10 @@ router.delete('/comentarios/:id', comentarioController.destroy);
 router.get('/comentarios/root/:cod_video', comentarioController.getRootComments);
 router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepplyes);
 
-router.get('/relatorios/treinamentos', relatorioController.treinamentosUsuarios);
+router.post('/relatorios/pdf', relatorioController.criaPdf);
+router.get('/relatorios/teste', relatorioController.teste);
 router.get('/relatorios/cursos', relatorioController.cursos);
-router.post('/relatorios/teste', relatorioController.teste);
+router.get('/relatorios/treinamentos', relatorioController.treinamentos);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
