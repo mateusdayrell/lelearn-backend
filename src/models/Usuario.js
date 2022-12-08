@@ -114,11 +114,13 @@ class Usuario extends Model {
       through: 'usuarios_videos',
       as: 'videos',
       foreignKey: 'cpf',
+      hooks: true,
     });
     this.belongsToMany(models.Curso, {
       through: 'usuarios_videos',
       as: 'cursos',
       foreignKey: 'cpf',
+      hooks: true,
     });
   }
 }

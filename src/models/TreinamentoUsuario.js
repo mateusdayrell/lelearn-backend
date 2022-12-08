@@ -28,6 +28,19 @@ class TreinamentoUsuario extends Model {
           type: DataTypes.DATE,
           allowNull: true,
         },
+        cursos_concluidos: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
+        testando: {
+          type: DataTypes.VIRTUAL,
+          // eslint-disable-next-line consistent-return
+          get() {
+            console.log(this);
+            return 'TESTE';
+          },
+        },
       },
       {
         sequelize,

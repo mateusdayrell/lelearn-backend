@@ -1,4 +1,6 @@
+/* eslint-disable consistent-return */
 const { Model, DataTypes } = require('sequelize');
+const handleHook = require('../helpers/UsuarioVideoHelper.js/hooksHelper');
 
 class UsuarioVideo extends Model {
   static init(sequelize) { // init UsuarioVideo
@@ -41,13 +43,45 @@ class UsuarioVideo extends Model {
       },
     );
 
+    this.addHook('afterSave', async (obj) => {
+      try {
+        const { cod_curso, cpf } = obj;
+
+        const qtd = await this.count({
+          where: { cpf, cod_curso },
+        });
+
+        await handleHook('save', obj, qtd);
+      } catch (error) {
+        return JSON.stringify({
+          erros: ['Erro ao executar hook.'],
+        });
+      }
+    });
+
+    this.addHook('afterBulkDestroy', async (obj) => {
+      try {
+        const { cod_curso, cpf } = obj.where;
+
+        const qtd = await this.count({
+          where: { cpf, cod_curso },
+        });
+
+        await handleHook('destroy', obj.where, (qtd + 1));
+      } catch (error) {
+        return JSON.stringify({
+          erros: ['Erro ao executar hook.'],
+        });
+      }
+    });
+
     return this;
   }
 
   static associate(models) {
-    this.belongsTo(models.Usuario, { foreignKey: 'cpf', as: 'usuario' });
-    this.belongsTo(models.Video, { foreignKey: 'cod_video', as: 'video' });
-    this.belongsTo(models.Curso, { foreignKey: 'cod_curso', as: 'curso' });
+    this.belongsTo(models.Usuario, { foreignKey: 'cpf', as: 'usuario', hooks: true });
+    this.belongsTo(models.Video, { foreignKey: 'cod_video', as: 'video', hooks: true });
+    this.belongsTo(models.Curso, { foreignKey: 'cod_curso', as: 'curso', hooks: true });
   }
 }
 

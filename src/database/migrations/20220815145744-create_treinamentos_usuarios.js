@@ -27,6 +27,11 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true,
       },
+      cursos_concluidos: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: true,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
