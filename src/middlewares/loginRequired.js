@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-// import Usuario from '../models/Usuario';
+import Usuario from '../models/Usuario';
 
 export default (req, res, next) => {
   const { authorization } = req.headers;
@@ -17,15 +17,15 @@ export default (req, res, next) => {
     const { cpf, email, tipo } = dados;
 
     // Verifica se os dados do token sao os mesmos do usuario logado
-    // const usuario = Usuario.findOne({
-    //   where: { cpf, email, tipo },
-    // });
+    const usuario = Usuario.findOne({
+      where: { cpf, email, tipo },
+    });
 
-    // if (!usuario) {
-    //   return res.status(401).json({
-    //     errors: ['Usuário inválido'],
-    //   });
-    // }
+    if (!usuario) {
+      return res.status(401).json({
+        errors: ['Usuário inválido'],
+      });
+    }
 
     req.userCpf = cpf;
     req.userEmail = email;

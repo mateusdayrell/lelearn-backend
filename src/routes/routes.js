@@ -84,6 +84,7 @@ router.post('/relatorios/pdf', relatorioController.criaPdf);
 router.get('/relatorios/teste', relatorioController.teste);
 router.get('/relatorios/cursos', relatorioController.cursos);
 router.get('/relatorios/treinamentos', relatorioController.treinamentos);
+router.get('/relatorios/usuario/:id', relatorioController.usuario);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
