@@ -40,7 +40,7 @@ class Treinamento extends Model {
           validate: {
             len: {
               args: [4, 7],
-              msg: 'A descrição do treinamento deve ter entre 4 e 7 caracteres.',
+              msg: 'Selecione uma cor para o treinamento.',
             },
           },
         },
