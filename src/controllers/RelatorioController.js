@@ -100,43 +100,174 @@ class RelatorioController {
     }
   }
 
-  async treinamentos(req, res) {
+  async treinamento(req, res) {
     try {
-      const treinamentos = await Treinamento.findAll({
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do treinamento não enviado.'],
+        });
+      }
+
+      const treinamento = await Treinamento.findByPk(id, {
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(cpf) FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = `Treinamento`.`cod_treinamento`)'), 'total_usuarios'],
-            [sequelize.literal('(SELECT COUNT(cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)'), 'total_cursos'],
-            [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`))'), 'total_videos'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)))'), 'total_comentarios'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`)) AND C.resolvido = 1)'), 'total_comentarios_resolvidos'],
+            [sequelize.literal(`(SELECT COUNT(cpf) FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = ${id})`), 'total_usuarios'],
+            [sequelize.literal(`(SELECT COUNT(cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})`), 'total_cursos'],
+            [sequelize.literal(`(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}))`), 'total_videos'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})))`), 'total_comentarios'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})) AND C.resolvido = 1)`), 'total_comentarios_resolvidos'],
           ],
         },
         include: [
-          {
-            model: Curso,
-            as: 'cursos',
-            attributes: {
-              include: [
-                [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `cursos`.`cod_curso`)'), 'total_videos'],
-              ],
-            },
-          },
           {
             model: Usuario,
             as: 'usuarios',
             attributes: {
               include: [
-                [sequelize.literal('(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = `Treinamento`.`cod_treinamento`))'), 'videos_assistidos'],
+                [sequelize.literal(`IF((SELECT cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cpf = \`usuarios\`.\`cpf\` AND TU.cod_treinamento = ${id}) = (SELECT COUNT(cod_curso) FROM treinamentos_cursos TC where TC.cod_treinamento = ${id}), true, false)`), 'concluido'],
+                [sequelize.literal(`(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cpf = \`usuarios\`.\`cpf\` AND UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}))`), 'videos_assistidos'],
+                [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios'],
+                // [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.resolvido = 1 AND C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios_resolvidos'],
               ],
+              exclude: ['senha', 'password_reset_token', 'password_reset_expires'],
             },
             through: {
-              attributes: ['prazo', 'testando'],
+              attributes: ['prazo', 'cursos_concluidos'],
             },
           },
         ],
       });
-      return res.json(treinamentos);
+
+      if (!treinamento) {
+        return res.status(400).json({
+          erros: ['Treinamento não existe.'],
+        });
+      }
+
+      const json = JSON.stringify(treinamento);
+      const obj = JSON.parse(json);
+
+      const body = [];
+      const bodyTreinamento = [[
+        { text: obj.total_usuarios, style: 'center' },
+        { text: obj.total_cursos, style: 'center' },
+        { text: obj.total_videos, style: 'center' },
+        { text: obj.total_comentarios, style: 'center' },
+        { text: obj.total_comentarios_resolvidos, style: 'center' },
+      ]];
+
+      obj.usuarios.forEach((user, i) => {
+        const rows = [];
+        rows.push(i);
+        rows.push(user.cpf);
+        rows.push(user.nome);
+        rows.push(user.treinamentos_usuarios.prazo
+          ? moment(user.treinamentos_usuarios.prazo).format('DD/MM/YYYY')
+          : 'Sem prazo');
+        rows.push(user.concluido ? 'Sim' : 'Não');
+        rows.push(user.treinamentos_usuarios.cursos_concluidos);
+        rows.push(user.videos_assistidos);
+        rows.push(user.total_comentarios);
+        body.push(rows);
+      });
+
+      const docDefinitions = {
+        defaultStyle: { font: 'Helvetica' },
+        footer(currentPage, pageCount) { return { text: `Página ${currentPage.toString()} de ${pageCount}`, style: 'footer' }; },
+        header(currentPage) {
+          if (currentPage === 1) {
+            return [
+              { text: 'LeLearn', alignment: 'left', style: 'header' },
+            ];
+          }
+          return [];
+        },
+        content: [
+          { text: `Relatório de treinamento - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: 'Dados do treinamento:\n\n', style: 'title' },
+          {
+            columns: [
+              { text: `Código: ${treinamento.cod_treinamento}` },
+              { text: `Nome: ${treinamento.nome_treinamento}` },
+              { text: `Criado em: ${moment(treinamento.created_at).format('DD/MM/YYYY')}\n\n` },
+            ],
+          },
+          {
+            text: `Descrição: ${treinamento.desc_treinamento}\n\n\n`,
+          },
+          { text: 'Estatísticas gerais do treinamento:\n\n', style: 'title' },
+          {
+            table: {
+              widths: [95, 95, 95, 95, 95],
+              body: [
+                [
+                  { text: 'Usuários', style: 'tableHeader' },
+                  { text: 'Cursos', style: 'tableHeader' },
+                  { text: 'Vídeos', style: 'tableHeader' },
+                  { text: 'Comentários', style: 'tableHeader' },
+                  { text: 'Comentários resolvidos', style: 'tableHeader' },
+                ],
+                ...bodyTreinamento,
+              ],
+            },
+          },
+          { text: '\n\n\n' },
+          { text: 'Usuários:\n\n', style: 'title' },
+          {
+            table: {
+              widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+              body: [
+                [
+                  { text: 'Nº', style: 'tableHeader' },
+                  { text: 'CPF', style: 'tableHeader' },
+                  { text: 'Nome', style: 'tableHeader' },
+                  { text: 'Prazo', style: 'tableHeader' },
+                  { text: 'Concluído', style: 'tableHeader' },
+                  { text: 'Cursos concluídos', style: 'tableHeader' },
+                  { text: 'Vídeos assistidos', style: 'tableHeader' },
+                  { text: 'Comentários', style: 'tableHeader' },
+                ],
+                ...body,
+              ],
+            },
+          },
+        ],
+        styles: {
+          header: {
+            color: '#00B37E',
+            characterSpacing: 0.5,
+            margin: [260, 10, 0, 0],
+            bold: true,
+          },
+          footer: {
+            margin: [20, 20, 0, 10],
+          },
+          contentHeader: {
+            fontSize: 16,
+            bold: true,
+            alignment: 'center',
+          },
+          title: {
+            fontSize: 12,
+            bold: true,
+          },
+          tableHeader: {
+            fontSize: 11,
+            bold: true,
+            alignment: 'center',
+          },
+          center: {
+            alignment: 'center',
+          },
+        },
+      };
+
+      // eslint-disable-next-line no-use-before-define
+      pdf(docDefinitions, res);
+
+      // return res.json(treinamento);
     } catch (error) {
       console.log(error);
       return res.json(error);
@@ -146,6 +277,13 @@ class RelatorioController {
   async usuarioTreinamentos(req, res) {
     try {
       const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
+
       const usuario = await Usuario.findByPk(id, {
         attributes: {
           include: [
@@ -156,6 +294,7 @@ class RelatorioController {
             [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cpf = ${id})`), 'total_comentarios'],
             [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cpf = ${id} AND C.resolvido = 1)`), 'total_comentarios_resolvidos'],
           ],
+          exclude: ['senha', 'password_reset_token', 'password_reset_expires'],
         },
         include: [
           {
@@ -174,6 +313,12 @@ class RelatorioController {
         ],
       });
 
+      if (!usuario) {
+        return res.status(400).json({
+          erros: ['Usuário não existe.'],
+        });
+      }
+
       const json = JSON.stringify(usuario);
       const obj = JSON.parse(json);
 
@@ -187,8 +332,9 @@ class RelatorioController {
         { text: obj.total_comentarios_resolvidos, style: 'center' },
       ]];
 
-      obj.treinamentos.forEach((trein) => {
+      obj.treinamentos.forEach((trein, i) => {
         const rows = [];
+        rows.push(i);
         rows.push(trein.cod_treinamento);
         rows.push(trein.nome_treinamento);
         rows.push(trein.desc_treinamento);
@@ -254,10 +400,11 @@ class RelatorioController {
           { text: 'Treinamentos:\n\n', style: 'title' },
           {
             table: {
-              widths: [45, 'auto', 130, 'auto', 'auto', 'auto', 65],
+              widths: ['auto', 27, 'auto', 120, 'auto', 'auto', 'auto', 64],
               body: [
                 [
-                  { text: 'Código', style: 'tableHeader' },
+                  { text: 'Nº', style: 'tableHeader' },
+                  { text: 'Cod.', style: 'tableHeader' },
                   { text: 'Nome', style: 'tableHeader' },
                   { text: 'Descrição', style: 'tableHeader' },
                   { text: 'Concluído', style: 'tableHeader' },
@@ -286,7 +433,7 @@ class RelatorioController {
             alignment: 'center',
           },
           title: {
-            fontSize: 14,
+            fontSize: 12,
             bold: true,
           },
           tableHeader: {

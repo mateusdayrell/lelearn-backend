@@ -83,7 +83,7 @@ router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepp
 router.post('/relatorios/pdf', relatorioController.criaPdf);
 router.get('/relatorios/teste', relatorioController.teste);
 router.get('/relatorios/cursos', relatorioController.cursos);
-router.get('/relatorios/treinamentos', relatorioController.treinamentos);
+router.get('/relatorios/treinamento/:id', relatorioController.treinamento);
 router.get('/relatorios/usuario-treinamentos/:id', relatorioController.usuarioTreinamentos);
 
 // TREINAMENTOS-USUARIOS
