@@ -11,65 +11,6 @@ import Treinamento from '../models/Treinamento';
 import Usuario from '../models/Usuario';
 
 class RelatorioController {
-  async teste(req, res) {
-    const videos = await Video.findAll({
-      order: [['titulo_video']],
-    });
-    const fonts = {
-      Helvetica: {
-        normal: 'Helvetica',
-        bold: 'Helvetica-Bold',
-        italics: 'Helvetica-Oblique',
-        bolditalics: 'Helvetica-BoldOblique',
-      },
-    };
-
-    const printer = new PdfPrinter(fonts);
-    const body = [];
-
-    videos.forEach((vid) => {
-      const rows = [];
-      rows.push(vid.cod_video);
-      rows.push(vid.titulo_video);
-      body.push(rows);
-    });
-
-    const docDefinitions = {
-      defaultStyle: { font: 'Helvetica' },
-      content: [
-        {
-          table: {
-            body: [['cod_video', 'titulo_video'], ...body],
-          },
-        },
-      ],
-    };
-
-    const pdfDoc = printer.createPdfKitDocument(docDefinitions);
-
-    const chunks = [];
-
-    pdfDoc.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
-
-    pdfDoc.end();
-
-    pdfDoc.on('end', () => {
-      const result = Buffer.concat(chunks);
-      return res.end(result);
-    });
-  }
-
-  criaPdf(req, res) {
-    createPdfBinary((binary) => {
-      res.contentType('application/pdf');
-      res.send(binary);
-    }, (error) => {
-      res.send(`ERROR:${error}`);
-    });
-  }
-
   async cursos(req, res) {
     try {
       const cursos = await Curso.findAll({
@@ -129,6 +70,7 @@ class RelatorioController {
                 [sequelize.literal(`IF((SELECT cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cpf = \`usuarios\`.\`cpf\` AND TU.cod_treinamento = ${id}) = (SELECT COUNT(cod_curso) FROM treinamentos_cursos TC where TC.cod_treinamento = ${id}), true, false)`), 'concluido'],
                 [sequelize.literal(`(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cpf = \`usuarios\`.\`cpf\` AND UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}))`), 'videos_assistidos'],
                 [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios'],
+                // eslint-disable-next-line max-len
                 // [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.resolvido = 1 AND C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios_resolvidos'],
               ],
               exclude: ['senha', 'password_reset_token', 'password_reset_expires'],
@@ -454,39 +396,178 @@ class RelatorioController {
       return res.json(error);
     }
   }
-}
 
-function createPdfBinary(callback) {
-  const docDefinitions = {
-    defaultStyle: { font: 'Helvetica' },
-    content: [
-      { text: 'Relatório teste' },
-    ],
-  };
+  async usuarioCursos(req, res) {
+    try {
+      const { id } = req.params;
 
-  const fontDescriptors = {
-    Helvetica: {
-      normal: 'Helvetica',
-      bold: 'Helvetica-Bold',
-      italics: 'Helvetica-Oblique',
-      bolditalics: 'Helvetica-BoldOblique',
-    },
-  };
+      if (!id) {
+        return res.status(400).json({
+          erros: ['CPF não enviado.'],
+        });
+      }
 
-  const printer = new PdfPrinter(fontDescriptors);
-  const doc = printer.createPdfKitDocument(docDefinitions);
-  const chunks = [];
+      const usuario = await Usuario.findByPk(id, {
+        attributes: {
+          include: [
+            [sequelize.literal(`(SELECT COUNT(DISTINCT(cod_curso)) FROM usuarios_videos UV WHERE UV.cpf = ${id} )`), 'cursos_iniciados'],
+            [sequelize.literal(`(SELECT COUNT(DISTINCT(cod_curso)) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND (SELECT COUNT(UV1.cod_video) FROM usuarios_videos UV1 WHERE UV1.cpf = ${id} AND UV1.cod_curso = UV.cod_curso) = (SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = UV.cod_curso))`), 'cursos_concluidos'],
+            [sequelize.literal(`(SELECT COUNT(cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} )`), 'videos_assistidos'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cpf = ${id})`), 'comentarios'],
+          ],
+          exclude: ['senha', 'password_reset_token', 'password_reset_expires'],
+        },
+        include: [
+          {
+            model: Curso,
+            as: 'cursos',
+            attributes: {
+              include: [
+                [sequelize.literal(`IF((SELECT COUNT(cod_video) FROM usuarios_videos UV WHERE UV.cpf = ${id} AND UV.cod_curso = \`cursos\`.\`cod_curso\`) = (SELECT COUNT(cod_video) FROM cursos_videos CV where CV.cod_curso = \`cursos\`.\`cod_curso\`), true, false)`), 'concluido'],
+                [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos WHERE cod_curso = `cursos`.`cod_curso`)'), 'total_videos'],
+                [sequelize.literal(`(SELECT COUNT(cod_video) FROM usuarios_videos WHERE cod_curso = \`cursos\`.\`cod_curso\` AND cpf = ${id})`), 'total_videos_assistidos'],
+                [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso = \`cursos\`.\`cod_curso\`) AND C.cpf = ${id})`), 'comentarios'],
+              ],
+            },
+          },
+        ],
+      });
 
-  doc.on('data', (chunk) => {
-    chunks.push(chunk);
-  });
+      if (!usuario) {
+        return res.status(400).json({
+          erros: ['Usuário não existe.'],
+        });
+      }
 
-  doc.on('end', () => {
-    const result = Buffer.concat(chunks);
-    callback(`data:application/pdf;base64,${result.toString('base64')}`);
-  });
+      const json = JSON.stringify(usuario);
+      const obj = JSON.parse(json);
 
-  doc.end();
+      const body = [];
+      const bodyUsuario = [[
+        { text: obj.cursos_iniciados, style: 'center' },
+        { text: obj.cursos_concluidos, style: 'center' },
+        { text: obj.videos_assistidos, style: 'center' },
+        { text: obj.comentarios, style: 'center' },
+      ]];
+
+      obj.cursos.forEach((curso, i) => {
+        const rows = [];
+        rows.push(i);
+        rows.push(curso.cod_curso);
+        rows.push(curso.nome_curso);
+        rows.push(curso.desc_curso);
+        rows.push(curso.concluido ? 'Sim' : 'Não');
+        rows.push(curso.total_videos);
+        rows.push(curso.total_videos_assistidos);
+        rows.push(curso.comentarios);
+        body.push(rows);
+      });
+
+      const docDefinitions = {
+        defaultStyle: { font: 'Helvetica' },
+        footer(currentPage, pageCount) { return { text: `Página ${currentPage.toString()} de ${pageCount}`, style: 'footer' }; },
+        header(currentPage) {
+          if (currentPage === 1) {
+            return [
+              { text: 'LeLearn', alignment: 'left', style: 'header' },
+            ];
+          }
+          return [];
+        },
+        content: [
+          { text: `Relatório de cursos do usuário - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: 'Dados do usuário:\n\n', style: 'title' },
+          {
+            columns: [
+              { text: `CPF: ${cpfValidator.format(usuario.cpf)}` },
+              { text: `Nome: ${usuario.nome}\n\n` },
+            ],
+          },
+          {
+            columns: [
+              { text: `Criado em: ${moment(usuario.created_at).format('DD/MM/YYYY')}` },
+              { text: `Tipo: ${usuario.tipo === 0 ? 'Administrador' : 'Usuário comum'}\n\n` },
+            ],
+          },
+          {
+            columns: [
+              { text: `Telefone: ${usuario.telefone}` },
+              { text: `Email: ${usuario.email} \n\n\n` },
+            ],
+          },
+          { text: 'Estatísticas gerais do usuário:\n\n', style: 'title' },
+          {
+            table: {
+              widths: [120, 120, 120, 120],
+              body: [
+                [
+                  { text: 'Cursos iniciados', style: 'tableHeader' },
+                  { text: 'Cursos concluídos', style: 'tableHeader' },
+                  { text: 'Vídeos assistidos', style: 'tableHeader' },
+                  { text: 'Comentários', style: 'tableHeader' },
+                ],
+                ...bodyUsuario,
+              ],
+            },
+          },
+          { text: '\n\n\n' },
+          { text: 'Cursos:\n\n', style: 'title' },
+          {
+            table: {
+              widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+              body: [
+                [
+                  { text: 'Nº', style: 'tableHeader' },
+                  { text: 'Cod.', style: 'tableHeader' },
+                  { text: 'Nome', style: 'tableHeader' },
+                  { text: 'Descrição', style: 'tableHeader' },
+                  { text: 'Concluído', style: 'tableHeader' },
+                  { text: 'Vídeos', style: 'tableHeader' },
+                  { text: 'Vídeos assistidos', style: 'tableHeader' },
+                  { text: 'Comentarios', style: 'tableHeader' },
+                ],
+                ...body,
+              ],
+            },
+          },
+        ],
+        styles: {
+          header: {
+            color: '#00B37E',
+            characterSpacing: 0.5,
+            margin: [260, 10, 0, 0],
+            bold: true,
+          },
+          footer: {
+            margin: [20, 20, 0, 10],
+          },
+          contentHeader: {
+            fontSize: 16,
+            bold: true,
+            alignment: 'center',
+          },
+          title: {
+            fontSize: 12,
+            bold: true,
+          },
+          tableHeader: {
+            fontSize: 12,
+            bold: true,
+            alignment: 'center',
+          },
+          center: {
+            alignment: 'center',
+          },
+        },
+      };
+
+      // eslint-disable-next-line no-use-before-define
+      pdf(docDefinitions, res);
+    } catch (error) {
+      console.log(error);
+      return res.json(error);
+    }
+  }
 }
 
 const pdf = (docDefinitions, res) => {
