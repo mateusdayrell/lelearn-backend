@@ -81,6 +81,7 @@ router.get('/comentarios/root/:cod_video', comentarioController.getRootComments)
 router.get('/comentarios/repplyes/:cod_comentario', comentarioController.getRepplyes);
 
 router.get('/relatorios/cursos', relatorioController.cursos);
+router.get('/relatorios/videos', relatorioController.videos);
 router.get('/relatorios/treinamento/:id', relatorioController.treinamento);
 router.get('/relatorios/usuario-treinamentos/:id', relatorioController.usuarioTreinamentos);
 router.get('/relatorios/usuario-cursos/:id', relatorioController.usuarioCursos);

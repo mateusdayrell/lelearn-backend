@@ -19,22 +19,98 @@ class RelatorioController {
             [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`)'), 'videos_qtd'],
             [sequelize.literal('(SELECT COUNT(cod_treinamento) FROM treinamentos_cursos TC WHERE TC.cod_curso = `Curso`.`cod_curso`)'), 'treinamentos_qtd'],
             [sequelize.literal('(SELECT COUNT(DISTINCT(cpf)) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso`)'), 'alcance_usuarios'],
+            [sequelize.literal('(SELECT COUNT(cod_curso) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso`)'), 'visualizacoes'],
             [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`))'), 'comentarios_qtd'],
             [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`) AND C.resolvido = 1)'), 'comentarios_resolvidos_qtd'],
           ],
         },
-        include: [
+        order: ['nome_curso'],
+      });
+
+      const json = JSON.stringify(cursos);
+      const obj = JSON.parse(json);
+
+      const body = [];
+
+      obj.forEach((curso, i) => {
+        const rows = [];
+        rows.push(i);
+        rows.push(curso.cod_curso);
+        rows.push(curso.nome_curso);
+        rows.push(curso.videos_qtd);
+        rows.push(curso.treinamentos_qtd);
+        rows.push(curso.alcance_usuarios);
+        rows.push(curso.visualizacoes);
+        rows.push(curso.comentarios_qtd);
+        rows.push(curso.comentarios_resolvidos_qtd);
+        body.push(rows);
+      });
+
+      const docDefinitions = {
+        defaultStyle: { font: 'Helvetica' },
+        footer(currentPage, pageCount) { return { text: `Página ${currentPage.toString()} de ${pageCount}`, style: 'footer' }; },
+        header(currentPage) {
+          if (currentPage === 1) {
+            return [
+              { text: 'LeLearn', alignment: 'left', style: 'header' },
+            ];
+          }
+          return [];
+        },
+        content: [
+          { text: `Relatório de cursos - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
           {
-            model: Video,
-            as: 'videos',
-          },
-          {
-            model: Treinamento,
-            as: 'treinamentos',
+            style: 'table',
+            table: {
+              widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+              body: [
+                [
+                  { text: 'Nº', style: 'tableHeader' },
+                  { text: 'Cod', style: 'tableHeader' },
+                  { text: 'Nome', style: 'tableHeader' },
+                  { text: 'Vídeos', style: 'tableHeader' },
+                  { text: 'Treinamentos', style: 'tableHeader' },
+                  { text: 'Usuários alcançados', style: 'tableHeader' },
+                  { text: 'Visualizações', style: 'tableHeader' },
+                  { text: 'Comentários', style: 'tableHeader' },
+                  { text: 'Comentários resolvidos', style: 'tableHeader' },
+                ],
+                ...body,
+              ],
+            },
           },
         ],
-      });
-      return res.json(cursos);
+        styles: {
+          table: {
+            fontSize: 10,
+          },
+          header: {
+            color: '#00B37E',
+            characterSpacing: 0.5,
+            margin: [260, 10, 0, 0],
+            bold: true,
+          },
+          footer: {
+            margin: [20, 20, 0, 10],
+          },
+          contentHeader: {
+            fontSize: 16,
+            bold: true,
+            alignment: 'center',
+          },
+          tableHeader: {
+            fontSize: 10,
+            bold: true,
+            alignment: 'center',
+          },
+          center: {
+            alignment: 'center',
+          },
+        },
+      };
+
+      // eslint-disable-next-line no-use-before-define
+      pdf(docDefinitions, res);
     } catch (error) {
       console.log(error);
       return res.json(error);
@@ -80,6 +156,7 @@ class RelatorioController {
             },
           },
         ],
+        order: [['usuarios', 'nome']],
       });
 
       if (!treinamento) {
@@ -232,7 +309,7 @@ class RelatorioController {
             [sequelize.literal(`(SELECT COUNT(cpf) FROM treinamentos_usuarios TU, treinamentos T WHERE TU.cpf = ${id} AND T.cod_treinamento = TU.cod_treinamento AND T.deleted_at IS NULL)`), 'total_treinamentos'],
             [sequelize.literal(`(SELECT COUNT(cpf) FROM treinamentos_usuarios TU, treinamentos T WHERE TU.cpf = ${id} AND TU.cursos_concluidos = (SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = TU.cod_treinamento) AND T.cod_treinamento = TU.cod_treinamento AND T.deleted_at IS NULL)`), 'total_treinamentos_concluidos'],
             [sequelize.literal(`(SELECT COUNT(DISTINCT(UV.cod_curso)) FROM usuarios_videos UV, cursos C WHERE UV.cpf = ${id} AND (SELECT COUNT(UV1.cod_curso) FROM usuarios_videos UV1 WHERE UV1.cod_curso = UV.cod_curso AND UV1.cpf = ${id}) = (SELECT C1.videos_qtd FROM cursos C1 WHERE C1.cod_curso = UV.cod_curso) AND C.cod_curso = UV.cod_curso AND C.deleted_at IS NULL)`), 'total_cursos_concluidos'],
-            [sequelize.literal(`(SELECT COUNT(DISTINCT(UV.cod_video)) FROM usuarios_videos UV, videos V WHERE UV.cpf = ${id} AND V.cod_video = UV.cod_video AND V.deleted_at IS NULL)`), 'total_videos_assistidos'],
+            [sequelize.literal(`(SELECT COUNT(UV.cod_video) FROM usuarios_videos UV, videos V WHERE UV.cpf = ${id} AND V.cod_video = UV.cod_video AND V.deleted_at IS NULL)`), 'total_videos_assistidos'],
             [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cpf = ${id})`), 'total_comentarios'],
             [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cpf = ${id} AND C.resolvido = 1)`), 'total_comentarios_resolvidos'],
           ],
@@ -253,6 +330,7 @@ class RelatorioController {
             },
           },
         ],
+        order: [['treinamentos', 'nome_treinamento']],
       });
 
       if (!usuario) {
@@ -431,6 +509,7 @@ class RelatorioController {
             },
           },
         ],
+        order: [['cursos', 'nome_curso']],
       });
 
       if (!usuario) {
@@ -552,6 +631,110 @@ class RelatorioController {
           },
           tableHeader: {
             fontSize: 12,
+            bold: true,
+            alignment: 'center',
+          },
+          center: {
+            alignment: 'center',
+          },
+        },
+      };
+
+      // eslint-disable-next-line no-use-before-define
+      pdf(docDefinitions, res);
+    } catch (error) {
+      console.log(error);
+      return res.json(error);
+    }
+  }
+
+  async videos(req, res) {
+    try {
+      const videos = await Video.findAll({
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(cod_curso) FROM cursos_videos CV WHERE CV.cod_video = `Video`.`cod_video`)'), 'cursos_qtd'],
+            [sequelize.literal('(SELECT COUNT(cod_treinamento) FROM treinamentos_cursos TC WHERE TC.cod_curso IN (SELECT CV.cod_curso FROM cursos_videos CV WHERE CV.cod_video = `Video`.`cod_video`))'), 'treinamentos_qtd'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT(cpf)) FROM usuarios_videos UV WHERE UV.cod_video = `Video`.`cod_video`)'), 'alcance_usuarios'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video = `Video`.`cod_video`)'), 'comentarios_qtd'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video = `Video`.`cod_video` AND C.resolvido = 1)'), 'comentarios_resolvidos_qtd'],
+          ],
+        },
+        order: ['titulo_video'],
+      });
+
+      const json = JSON.stringify(videos);
+      const obj = JSON.parse(json);
+
+      const body = [];
+
+      obj.forEach((curso, i) => {
+        const rows = [];
+        rows.push(i);
+        rows.push(curso.cod_video);
+        rows.push(curso.titulo_video);
+        rows.push(curso.cursos_qtd);
+        rows.push(curso.treinamentos_qtd);
+        rows.push(curso.alcance_usuarios);
+        rows.push(curso.comentarios_qtd);
+        rows.push(curso.comentarios_resolvidos_qtd);
+        body.push(rows);
+      });
+
+      const docDefinitions = {
+        defaultStyle: { font: 'Helvetica' },
+        footer(currentPage, pageCount) { return { text: `Página ${currentPage.toString()} de ${pageCount}`, style: 'footer' }; },
+        header(currentPage) {
+          if (currentPage === 1) {
+            return [
+              { text: 'LeLearn', alignment: 'left', style: 'header' },
+            ];
+          }
+          return [];
+        },
+        content: [
+          { text: `Relatório de vídeos - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          {
+            style: 'table',
+            table: {
+              widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+              body: [
+                [
+                  { text: 'Nº', style: 'tableHeader' },
+                  { text: 'Cod', style: 'tableHeader' },
+                  { text: 'Nome', style: 'tableHeader' },
+                  { text: 'Cursos', style: 'tableHeader' },
+                  { text: 'Treinamentos', style: 'tableHeader' },
+                  { text: 'Usuários', style: 'tableHeader' },
+                  { text: 'Comentários', style: 'tableHeader' },
+                  { text: 'Comentários resolvidos', style: 'tableHeader' },
+                ],
+                ...body,
+              ],
+            },
+          },
+        ],
+        styles: {
+          table: {
+            fontSize: 10,
+            alignment: 'justify',
+          },
+          header: {
+            color: '#00B37E',
+            characterSpacing: 0.5,
+            margin: [260, 10, 0, 0],
+            bold: true,
+          },
+          footer: {
+            margin: [20, 20, 0, 10],
+          },
+          contentHeader: {
+            fontSize: 16,
+            bold: true,
+            alignment: 'center',
+          },
+          tableHeader: {
+            fontSize: 11,
             bold: true,
             alignment: 'center',
           },
