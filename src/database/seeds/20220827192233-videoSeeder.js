@@ -10,7 +10,7 @@ module.exports = {
           {
             cod_video: `00${i}`,
             titulo_video: faker.music.songName(),
-            desc_video: faker.commerce.productDescription(),
+            desc_video: faker.lorem.sentence(),
             link: 'https://www.youtube.com/embed/tgbNymZ7vqY',
             created_at: new Date(),
             updated_at: new Date(),
