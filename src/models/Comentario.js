@@ -1,5 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const { nanoid } = require('nanoid');
+const Usuario = require('./Usuario');
+const Notificacao = require('./Notificacao');
 
 class Comentario extends Model {
   static init(sequelize) { // init Comentario
@@ -39,6 +41,16 @@ class Comentario extends Model {
             },
           },
         },
+        cod_curso: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            len: {
+              args: [4, 4],
+              msg: 'O código do curso deve ter 4 caracteres.',
+            },
+          },
+        },
         comentario_pai: {
           type: DataTypes.STRING,
           allowNull: true,
@@ -70,12 +82,34 @@ class Comentario extends Model {
       },
     );
 
+    // eslint-disable-next-line consistent-return
+    this.addHook('afterCreate', async (comentario) => {
+      try {
+        const usuario = await Usuario.findByPk(comentario.cpf);
+
+        const obj = {
+          tipo: (comentario.comentario_pai ? usuario.tipo : 2),
+          cod_comentario: comentario.cod_comentario,
+          cod_video: comentario.cod_video,
+          cod_curso: comentario.cod_curso,
+        };
+
+        await Notificacao.create(obj);
+      } catch (error) {
+        console.log(error);
+        return JSON.stringify({
+          erros: ['Erro ao executar hook.'],
+        });
+      }
+    });
+
     return this;
   }
 
   static associate(models) {
     this.belongsTo(models.Usuario, { foreignKey: 'cpf', as: 'usuario' });
     this.belongsTo(models.Video, { foreignKey: 'cod_video', as: 'video' });
+    this.belongsTo(models.Curso, { foreignKey: 'cod_curso', as: 'curso' });
     this.hasMany(models.Comentario, { foreignKey: 'comentario_pai', as: 'respostas' });
     this.belongsTo(models.Comentario, { foreignKey: 'comentario_pai', as: 'pai' });
   }

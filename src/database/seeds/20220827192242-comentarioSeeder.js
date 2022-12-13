@@ -17,6 +17,7 @@ module.exports = {
               cod_comentario: codComentario,
               cpf: faker.helpers.arrayElement(usuarioHelper.staticCpfs),
               cod_video: codVideo,
+              cod_curso: faker.helpers.arrayElement(['0001', '0002', '0003', '0004', '0005']),
               comentario_pai: faker.helpers.arrayElement([codResposta, null]),
               texto: faker.helpers.arrayElement([faker.lorem.sentence(), faker.lorem.paragraphs()]),
               resolvido: false,

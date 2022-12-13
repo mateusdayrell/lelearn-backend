@@ -26,6 +26,16 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
+      cod_curso: {
+        type: Sequelize.STRING(4),
+        allowNull: false,
+        references: {
+          model: 'cursos',
+          key: 'cod_curso',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
       comentario_pai: {
         type: Sequelize.STRING(4),
         allowNull: true,

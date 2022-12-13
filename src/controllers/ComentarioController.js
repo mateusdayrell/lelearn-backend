@@ -4,13 +4,17 @@ const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
 const Video = require('../models/Video');
 const Curso = require('../models/Curso');
+const Notificacao = require('../models/Notificacao');
 
 module.exports = {
   async index(req, res) {
     try {
       const comentarios = await Comentario.findAll({
         where: {
-          comentario_pai: null,
+          [Op.and]: [
+            { comentario_pai: null },
+            { resolvido: 0 },
+          ],
         },
         attributes: {
           include: [
@@ -23,7 +27,7 @@ module.exports = {
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: [['created_at', 'DESC'], ['respostas', 'created_at', 'ASC']],
+        order: [['created_at', 'ASC'], ['respostas', 'created_at', 'ASC']],
       });
       return res.json(comentarios);
     } catch (error) {
@@ -73,16 +77,9 @@ module.exports = {
 
   async store(req, res) {
     try {
-      const erros = await validateBody(req.body, res); // eslint-disable-line
+      const comentario = await Comentario.create(req.body);
 
-      if (erros.length > 0) {
-        return res.status(400).json({
-          erros,
-        });
-      }
-
-      const novoComentario = await Comentario.create(req.body);
-      return res.json(novoComentario);
+      return res.json(comentario);
     } catch (error) {
       return res.status(400).json({
         erros: error,
@@ -224,6 +221,7 @@ module.exports = {
       const cod_video = urlParams.get('cod_video');
       const videos = urlParams.get('videos');
       const cpf = urlParams.get('cpf');
+      const resolvido = urlParams.get('resolvido');
 
       const comentarios = await Comentario.findAll({
         where: {
@@ -232,6 +230,8 @@ module.exports = {
             cpf && { cpf },
             cod_video && { cod_video },
             (!cod_video && videos.length > 0) && { cod_video: { [Op.or]: videos.split(',') } },
+            resolvido !== 'ambos' && ({ resolvido: resolvido }), // eslint-disable-line
+            { comentario_pai: null },
           ],
         },
         attributes: {
@@ -241,14 +241,55 @@ module.exports = {
           ],
         },
         include: [
-          { model: Comentario, as: 'respostas' },
+          { model: Comentario, as: 'respostas', include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: [['created_at', 'ASC']],
+        order: [['created_at', 'ASC'], ['respostas', 'created_at', 'ASC']],
       });
 
       return res.json(comentarios);
+    } catch (error) {
+      return res.status(400).json({
+        erros: error.errors.map((err) => err.message),
+      });
+    }
+  },
+
+  async resolve(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          erros: ['Código do comentario não enviado.'],
+        });
+      }
+
+      const comentario = await Comentario.findByPk(id, { include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } });
+
+      if (!comentario) {
+        return res.status(400).json({
+          erros: ['Comentario não existe.'],
+        });
+      }
+
+      comentario.set({ resolvido: 1 });
+      await comentario.save();
+
+      const respostas = await comentario.getRespostas({ include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } });
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const r of respostas) {
+        const resposta = await Comentario.findByPk(r.cod_comentario);
+        r.resolvido = true;
+        if (resposta.resolvido === false) {
+          resposta.set({ resolvido: 1 });
+          await resposta.save();
+        }
+      }
+
+      return res.json({ comentario, respostas });
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
