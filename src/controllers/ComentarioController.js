@@ -27,13 +27,13 @@ module.exports = {
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: [['created_at', 'ASC'], ['respostas', 'created_at', 'ASC']],
+        order: sequelize.literal('`respostas`.`created_at` DESC'),
       });
       return res.json(comentarios);
     } catch (error) {
       console.log(error);
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error, // .errors.map((err) => err.message),
       });
     }
   },
@@ -77,10 +77,30 @@ module.exports = {
 
   async store(req, res) {
     try {
-      const comentario = await Comentario.create(req.body);
+      console.log('ENTROU');
+      const novoComentario = await Comentario.create(req.body);
+      let comentarioPai = null;
 
-      return res.json(comentario);
+      if (novoComentario.comentario_pai) {
+        comentarioPai = await Comentario.findByPk(novoComentario.comentario_pai, {
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
+              [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+            ],
+          },
+          include: [
+            { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          ],
+        });
+
+        comentarioPai.set({ resolvido: 0 });
+        await comentarioPai.save();
+      }
+      console.log(comentarioPai);
+      return res.json({ novoComentario, comentarioPai });
     } catch (error) {
+      console.log(error);
       return res.status(400).json({
         erros: error,
       });
@@ -232,6 +252,7 @@ module.exports = {
             (!cod_video && videos.length > 0) && { cod_video: { [Op.or]: videos.split(',') } },
             resolvido !== 'ambos' && ({ resolvido: resolvido }), // eslint-disable-line
             { comentario_pai: null },
+            sequelize.literal('`Comentario`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
           ],
         },
         attributes: {
@@ -245,7 +266,7 @@ module.exports = {
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: [['created_at', 'ASC'], ['respostas', 'created_at', 'ASC']],
+        order: sequelize.literal('`respostas`.`created_at` DESC'),
       });
 
       return res.json(comentarios);
