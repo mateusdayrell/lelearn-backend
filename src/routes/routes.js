@@ -12,6 +12,7 @@ import videoController from '../controllers/VideoController';
 import treinamentoController from '../controllers/TreinamentoController';
 import comentarioController from '../controllers/ComentarioController';
 import relatorioController from '../controllers/RelatorioController';
+import notificacaoController from '../controllers/NotificacoesController';
 // import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 // import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 // import cursoVideoController from '../controllers/CursoVideoController';
@@ -86,6 +87,8 @@ router.get('/relatorios/videos', loginRequired, relatorioController.videos);
 router.get('/relatorios/treinamento/:id', loginRequired, relatorioController.treinamento);
 router.get('/relatorios/usuario-treinamentos/:id', loginRequired, relatorioController.usuarioTreinamentos);
 router.get('/relatorios/usuario-cursos/:id', loginRequired, relatorioController.usuarioCursos);
+
+router.get('/notificacoes/get-by-user/:id', loginRequired, notificacaoController.getByUser);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);

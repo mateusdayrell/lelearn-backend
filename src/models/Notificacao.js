@@ -62,7 +62,7 @@ class Notificacao extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Comentario, { foreignKey: 'cod_comentario', as: 'usuario' });
+    this.belongsTo(models.Comentario, { foreignKey: 'cod_comentario', as: 'comentario' });
     this.belongsTo(models.Video, { foreignKey: 'cod_video', as: 'video' });
     this.belongsTo(models.Curso, { foreignKey: 'cod_curso', as: 'curso' });
   }
