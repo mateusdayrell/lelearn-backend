@@ -33,7 +33,7 @@ module.exports = {
     } catch (error) {
       console.log(error);
       return res.status(400).json({
-        erros: error, // .errors.map((err) => err.message),
+        erros: error.errors.map((err) => err.message),
       });
     }
   },
@@ -77,7 +77,6 @@ module.exports = {
 
   async store(req, res) {
     try {
-      console.log('ENTROU');
       const novoComentario = await Comentario.create(req.body);
       let comentarioPai = null;
 
@@ -97,12 +96,11 @@ module.exports = {
         comentarioPai.set({ resolvido: 0 });
         await comentarioPai.save();
       }
-      console.log(comentarioPai);
+
       return res.json({ novoComentario, comentarioPai });
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
-        erros: error,
+        erros: error.errors.map((err) => err.message),
       });
     }
   },
