@@ -86,15 +86,19 @@ class Comentario extends Model {
     this.addHook('afterCreate', async (comentario) => {
       try {
         const usuario = await Usuario.findByPk(comentario.cpf);
+        const comentarioPai = await this.findByPk(comentario.comentario_pai);
+        const usuarioPai = await comentarioPai.getUsuario();
 
-        const obj = {
-          tipo: (comentario.comentario_pai ? usuario.tipo : 2),
-          cod_comentario: comentario.cod_comentario,
-          cod_video: comentario.cod_video,
-          cod_curso: comentario.cod_curso,
-        };
+        if (usuario.cpf !== usuarioPai.cpf) {
+          const obj = {
+            tipo: (comentario.comentario_pai ? (usuario.tipo === 0 ? 0 : 2) : 1), // eslint-disable-line
+            cod_comentario: comentario.comentario_pai || comentario.cod_comentario,
+            cod_video: comentario.cod_video,
+            cod_curso: comentario.cod_curso,
+          };
 
-        await Notificacao.create(obj);
+          await Notificacao.create(obj);
+        }
       } catch (error) {
         console.log(error);
         return JSON.stringify({
