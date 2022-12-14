@@ -4,7 +4,6 @@ const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
 const Video = require('../models/Video');
 const Curso = require('../models/Curso');
-const Notificacao = require('../models/Notificacao');
 
 module.exports = {
   async index(req, res) {
@@ -14,6 +13,7 @@ module.exports = {
           [Op.and]: [
             { comentario_pai: null },
             { resolvido: 0 },
+            sequelize.literal('`Comentario`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
           ],
         },
         attributes: {
