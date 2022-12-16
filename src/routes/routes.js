@@ -24,7 +24,7 @@ router.post('/tokens', tokenController.store);
 router.post('/send-reset-password/:cpf', tokenController.resetPassword);
 
 // USUÁRIOS
-router.get('/usuarios/', loginRequired, usuarioController.index);
+router.get('/usuarios/', usuarioController.index);
 router.get('/usuarios/:id', usuarioController.show);
 router.get('/usuarios/search/:search', usuarioController.search);
 router.get('/usuarios/get-cursos/:id', usuarioController.getCursos);
@@ -37,7 +37,7 @@ router.delete('/usuarios/:id', usuarioController.destroy);
 router.put('/usuarios-videos/:cpf/:cod_curso/:cod_video', usuarioController.updateVideo);
 
 // CURSOS
-router.get('/cursos/', loginRequired, cursoController.index);
+router.get('/cursos/', cursoController.index);
 router.get('/cursos/:id', cursoController.show);
 router.get('/cursos/search/:search', cursoController.search);
 router.get('/cursos/get-videos/:id', cursoController.getVideos);
@@ -47,7 +47,7 @@ router.put('/cursos/activate/:id', cursoController.activate);
 router.delete('/cursos/:id', cursoController.destroy);
 
 // VIDEOS
-router.get('/videos/', loginRequired, videoController.index);
+router.get('/videos/',videoController.index);
 router.get('/videos/:id', videoController.show);
 router.get('/videos/get-cursos/:id', videoController.getCursos);
 router.get('/videos/get-by-curso/:cod_curso/:cod_video', videoController.getByCurso);
@@ -61,7 +61,7 @@ router.delete('/videos/:id', videoController.destroy);
 // router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS
-router.get('/treinamentos/', loginRequired, treinamentoController.index);
+router.get('/treinamentos/',treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
 router.get('/treinamentos/search/:search', treinamentoController.search);
 router.get('/treinamentos/get-cursos-usuario/:id/:cpf', treinamentoController.getCursosDoUsuario);
@@ -71,7 +71,7 @@ router.put('/treinamentos/activate/:id', treinamentoController.activate);
 router.delete('/treinamentos/:id', treinamentoController.destroy);
 
 // COMENTARIOS
-router.get('/comentarios/', loginRequired, comentarioController.index);
+router.get('/comentarios/', comentarioController.index);
 router.get('/comentarios/:id', comentarioController.show);
 router.get('/comentarios/search/:search', comentarioController.search);
 router.post('/comentarios/', comentarioController.store);
