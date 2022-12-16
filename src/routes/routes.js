@@ -1,23 +1,23 @@
 /* eslint-disable max-len */
-import { Router } from 'express';
-
 // MIDDLEWARES
-import loginRequired from '../middlewares/loginRequired';
+const express = require('express');
+const loginRequired = require('../middlewares/loginRequired');
 
 // CONTROLLERS
-import tokenController from '../controllers/TokenController';
-import usuarioController from '../controllers/UsuarioController';
-import cursoController from '../controllers/CursoController';
-import videoController from '../controllers/VideoController';
-import treinamentoController from '../controllers/TreinamentoController';
-import comentarioController from '../controllers/ComentarioController';
-import relatorioController from '../controllers/RelatorioController';
-import notificacaoController from '../controllers/NotificacoesController';
+const tokenController = require('../controllers/TokenController');
+const usuarioController = require('../controllers/UsuarioController');
+const cursoController = require('../controllers/CursoController');
+const videoController = require('../controllers/VideoController');
+const treinamentoController = require('../controllers/TreinamentoController');
+const comentarioController = require('../controllers/ComentarioController');
+const relatorioController = require('../controllers/RelatorioController');
+const notificacaoController = require('../controllers/NotificacoesController');
+
+const router = express.Router();
+
 // import treinamentoUsuarioController from '../controllers/TreinamentoUsuarioController';
 // import treinamentoCursoController from '../controllers/TreinamentoCursoController';
 // import cursoVideoController from '../controllers/CursoVideoController';
-
-const router = new Router();
 
 // TOKEN
 router.post('/tokens', tokenController.store);
@@ -47,7 +47,7 @@ router.put('/cursos/activate/:id', cursoController.activate);
 router.delete('/cursos/:id', cursoController.destroy);
 
 // VIDEOS
-router.get('/videos/',videoController.index);
+router.get('/videos/', videoController.index);
 router.get('/videos/:id', videoController.show);
 router.get('/videos/get-cursos/:id', videoController.getCursos);
 router.get('/videos/get-by-curso/:cod_curso/:cod_video', videoController.getByCurso);
@@ -61,7 +61,7 @@ router.delete('/videos/:id', videoController.destroy);
 // router.get('/curso-video/:cod_curso/:cod_video', cursoVideoController.show);
 
 // TREINAMENTOS
-router.get('/treinamentos/',treinamentoController.index);
+router.get('/treinamentos/', treinamentoController.index);
 router.get('/treinamentos/:id', treinamentoController.show);
 router.get('/treinamentos/search/:search', treinamentoController.search);
 router.get('/treinamentos/get-cursos-usuario/:id/:cpf', treinamentoController.getCursosDoUsuario);
@@ -88,7 +88,7 @@ router.get('/relatorios/treinamento/:id', relatorioController.treinamento);
 router.get('/relatorios/usuario-treinamentos/:id', relatorioController.usuarioTreinamentos);
 router.get('/relatorios/usuario-cursos/:id', relatorioController.usuarioCursos);
 
-// router.get('/notificacoes/get-by-user/:id', notificacaoController.getByUser);
+router.get('/notificacoes/get-by-user/:id', notificacaoController.getByUser);
 
 // TREINAMENTOS-USUARIOS
 // router.get('/treinamentos-usuarios/', treinamentoUsuarioController.index);
@@ -104,4 +104,4 @@ router.get('/relatorios/usuario-cursos/:id', relatorioController.usuarioCursos);
 // router.put('/treinamentos-cursos/:cod_treinamento/:cod_curso', treinamentoCursoController.update);
 // router.delete('/treinamentos-cursos/:cod_treinamento/:cod_curso', treinamentoCursoController.destroy);
 
-export default router;
+module.exports = router;

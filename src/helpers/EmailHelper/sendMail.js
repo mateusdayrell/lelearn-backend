@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-import-module-exports
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 require('dotenv').config();
 

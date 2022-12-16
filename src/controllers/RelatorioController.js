@@ -1,14 +1,14 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable consistent-return */
-import PdfPrinter from 'pdfmake';
-import sequelize from 'sequelize';
-import moment from 'moment/moment';
-import { cpf as cpfValidator } from 'cpf-cnpj-validator';
+const PdfPrinter = require('pdfmake');
+const sequelize = require('sequelize');
+const moment = require('moment/moment');
+const { cpf: cpfValidator } = require('cpf-cnpj-validator');
 
-import Curso from '../models/Curso';
-import Video from '../models/Video';
-import Treinamento from '../models/Treinamento';
-import Usuario from '../models/Usuario';
+const Curso = require('../models/Curso');
+const Video = require('../models/Video');
+const Treinamento = require('../models/Treinamento');
+const Usuario = require('../models/Usuario');
 
 class RelatorioController {
   async cursos(req, res) {
@@ -781,4 +781,4 @@ const pdf = (docDefinitions, res) => {
   });
 };
 
-export default new RelatorioController();
+module.exports = new RelatorioController();

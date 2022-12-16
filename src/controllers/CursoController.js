@@ -1,12 +1,12 @@
-import { Op } from 'sequelize';
+const { Op } = require('sequelize');
 
-import Curso from '../models/Curso';
-import Video from '../models/Video';
-import upload from '../services/multer';
-import { apagarFotoCurso } from '../helpers/CursoHelper';
-import CursoVideo from '../models/CursoVideo';
+const Curso = require('../models/Curso');
+const Video = require('../models/Video');
+const upload = require('../services/multer');
+const { apagarFotoCurso } = require('../helpers/CursoHelper');
+const CursoVideo = require('../models/CursoVideo');
 
-class CursoController {
+module.exports = {
   async index(req, res) {
     try {
       const cursos = await Curso.findAll({
@@ -16,7 +16,7 @@ class CursoController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async show(req, res) {
     try {
@@ -34,7 +34,7 @@ class CursoController {
     } catch (error) {
       return res.json(null);
     }
-  }
+  },
 
   async store(req, res) {
     try {
@@ -79,7 +79,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async update(req, res) {
     try {
@@ -191,7 +191,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async destroy(req, res) {
     try {
@@ -233,7 +233,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async activate(req, res) {
     try {
@@ -265,7 +265,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async search(req, res) {
     try {
@@ -304,7 +304,7 @@ class CursoController {
         erros: error.errors.map((err) => err.message),
       });
     }
-  }
+  },
 
   async getVideos(req, res) {
     try {
@@ -324,7 +324,5 @@ class CursoController {
     } catch (error) {
       return res.json(null);
     }
-  }
-}
-
-export default new CursoController();
+  },
+};

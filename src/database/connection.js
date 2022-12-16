@@ -1,15 +1,15 @@
-import Sequelize from 'sequelize';
-import databaseConfig from '../config/database';
-import Treinamento from '../models/Treinamento';
-import Usuario from '../models/Usuario';
-import Curso from '../models/Curso';
-import Video from '../models/Video';
-import Comentario from '../models/Comentario';
-import TreinamentoUsuario from '../models/TreinamentoUsuario';
-import TreinamentoCurso from '../models/TreinamentoCurso';
-import UsuarioVideo from '../models/UsuarioVideo';
-import CursoVideo from '../models/CursoVideo';
-import Notificacao from '../models/Notificacao';
+const Sequelize = require('sequelize');
+const databaseConfig = require('../config/database');
+const Treinamento = require('../models/Treinamento');
+const Usuario = require('../models/Usuario');
+const Curso = require('../models/Curso');
+const Video = require('../models/Video');
+const Comentario = require('../models/Comentario');
+const TreinamentoUsuario = require('../models/TreinamentoUsuario');
+const TreinamentoCurso = require('../models/TreinamentoCurso');
+const UsuarioVideo = require('../models/UsuarioVideo');
+const CursoVideo = require('../models/CursoVideo');
+const Notificacao = require('../models/Notificacao');
 
 const models = [
   Treinamento, Usuario, Curso, Video, Comentario, TreinamentoUsuario, TreinamentoCurso,

@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import Usuario from '../models/Usuario';
+const jwt = require('jsonwebtoken');
+const Usuario = require('../models/Usuario');
 
-export default (req, res, next) => {
+module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {

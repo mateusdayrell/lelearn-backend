@@ -1,11 +1,11 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
-// import delay from 'express-delay';
-import { resolve } from 'path';
-import routes from './routes/routes';
-import './database/connection'; // connect to database;
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const helmet = require('helmet');
+// const delay = require('express-delay');
+const { resolve } = require('path');
+const routes = require('./routes/routes');
+require('./database/connection'); // connect to database;
 
 dotenv.config();
 
@@ -25,11 +25,11 @@ const corsOptions = {
   // credentials: true,
   // crossorigin:true,
   // headers: [{"Access-Control-Allow-Origin": "*"}],
-  headers: [{key: "Access-Control-Allow-Origin", value: "*"}],
+  headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
   origin: (origin, calback) => {
     if (whiteList.indexOf(origin) !== -1 || !origin) {
       calback(null, true);
-      console.log('FOI')
+      console.log('FOI');
     } else {
       calback(new Error('Não permitido pelo CORS.'));
     }
@@ -40,16 +40,15 @@ class App {
   constructor() {
     this.app = express();
 
-    this.app.use(function (req, res, next) {
+    this.app.use((req, res, next) => {
       // req.setHeader("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Origin", "*");
+      res.header('Access-Control-Allow-Origin', '*');
       next();
     });
 
     this.middlewares();
     this.routes();
   }
-  
 
   middlewares() {
     // this.app.use(cors(corsOptions));
@@ -67,4 +66,4 @@ class App {
   }
 }
 
-export default new App().app;
+module.exports = new App().app;
