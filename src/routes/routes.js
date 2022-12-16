@@ -23,6 +23,8 @@ const router = express.Router();
 router.post('/tokens', tokenController.store);
 router.post('/send-reset-password/:cpf', tokenController.resetPassword);
 
+router.get('/', usuarioController.index);
+
 // USUÁRIOS
 router.get('/usuarios/', usuarioController.index);
 router.get('/usuarios/:id', usuarioController.show);
