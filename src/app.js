@@ -13,7 +13,9 @@ const whiteList = [
   'http://localhost:3000',
   'http://localhost:3333',
   'https://llrn-frontend.vercel.app',
-  'lelearn.cmjgbmzbadlu.us-west-2.rds.amazonaws.com',
+  // 'lelearn.cmjgbmzbadlu.us-west-2.rds.amazonaws.com',
+  '0.tcp.sa.ngrok.io:13680',
+  'tcp://0.tcp.sa.ngrok.io:13680',
 ];
 
 const corsOptions = {
