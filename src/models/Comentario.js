@@ -120,7 +120,7 @@ class Comentario extends Model {
           }
         }
 
-        else if (usuario.tipo === 0) { // ADM RESPONDEU
+        else if (usuario.tipo === 0) { //  ADM RESPONDEU
           if (usuario.cpf !== comentarioPai.cpf) {
             // enviar para usuario do comentario pai
             const templatePai = await templates.notification2({
