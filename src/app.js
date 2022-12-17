@@ -10,9 +10,13 @@ require('./database/connection'); // connect to database;
 dotenv.config();
 
 const whiteList = [
-  // 'loacalhost:3000',
+  'http://localhost:3000',
   'https://a361-177-101-41-201.sa.ngrok.io',
   'https://a361-177-101-41-201.sa.ngrok.io/',
+  'http://localhost:3333',
+  'tcp://0.tcp.sa.ngrok.io:16264',
+  '0.tcp.sa.ngrok.io',
+  '0.tcp.sa.ngrok.io:16264',
   // 'https://48dc-138-99-191-36.sa.ngrok.io/',
   // 'https://48dc-138-99-191-36.sa.ngrok.io',
 ];
@@ -40,21 +44,21 @@ class App {
   constructor() {
     this.app = express();
 
-    this.app.use((req, res, next) => {
-      // req.setHeader("Access-Control-Allow-Origin", "*");
-      res.header('Access-Control-Allow-Origin', '*');
-      next();
-    });
+    // this.app.use((req, res, next) => {
+    //   // req.setHeader("Access-Control-Allow-Origin", "*");
+    //   res.header('Access-Control-Allow-Origin', '*');
+    //   next();
+    // });
 
     this.middlewares();
     this.routes();
   }
 
   middlewares() {
-    // this.app.use(cors(corsOptions));
+    this.app.use(cors());
     // this.app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
-    this.app.use(cors(corsOptions));
-    this.app.use(helmet());
+    // this.app.use(cors(corsOptions));
+    // this.app.use(helmet());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.static(resolve(__dirname, '..', 'uploads')));
