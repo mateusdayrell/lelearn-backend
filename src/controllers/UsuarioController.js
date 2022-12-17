@@ -279,17 +279,12 @@ module.exports = {
         });
       }
 
-      const where = `WHERE cpf = ${cpf}
-        AND cod_curso = ${cod_curso}
-        AND cod_video = ${cod_video}`;
-
-      const usuarioVideo = await UsuarioVideo.sequelize.query(
-        `SELECT * FROM usuarios_videos ${where} LIMIT 1`,
-        { type: QueryTypes.SELECT },
-      );
+      const usuarioVideo = await UsuarioVideo.findOne({
+        where: { cpf, cod_video, cod_curso },
+      });
 
       // eslint-disable-next-line max-len
-      if (usuarioVideo.length > 0) await UsuarioVideo.destroy({ where: { cpf, cod_curso, cod_video } });
+      if (usuarioVideo) await UsuarioVideo.destroy({ where: { cpf, cod_curso, cod_video } });
       else await UsuarioVideo.create(req.params);
 
       const videosUsuario = await UsuarioVideo.findAll({
