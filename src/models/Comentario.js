@@ -6,7 +6,7 @@ const { nanoid } = require('nanoid');
 const Usuario = require('./Usuario');
 
 const sendMail = require('../helpers/EmailHelper/sendMail');
-const templates = require('../helpers/EmailHelper/templates');
+const { comentarioTemplate } = require('../helpers/EmailHelper/templateComentario');
 const Video = require('./Video');
 
 class Comentario extends Model {
@@ -92,10 +92,9 @@ class Comentario extends Model {
     this.addHook('afterCreate', async (comentario) => {
       try {
         const usuario = await Usuario.findByPk(comentario.cpf);
-        const admins = await Usuario.findAll({ where: { tipo: 0 } });
         const video = await Video.findByPk(comentario.cod_video);
         let comentarioPai = null;
-        // let usuarioPai = null;
+        let respostaEmails = null;
 
         if (comentario.comentario_pai) {
           comentarioPai = await this.findByPk(comentario.comentario_pai, {
@@ -104,90 +103,44 @@ class Comentario extends Model {
               { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome', 'email'] },
             ],
           });
-          // usuarioPai = await comentarioPai.getUsuario();
+          respostaEmails = comentarioPai.respostas.map((resp) => { if (resp.usuario.cpf !== usuario.cpf) return resp.usuario.email; }); // eslint-disable-line
         }
 
-        if (!comentario.comentario_pai) { // enviar email para administrador - USUARIO COMENTOU
-          const template = await templates.notification1({
-            nome: usuario.nome, video: video.cod_video, curso: comentario.cod_curso, titulo: video.titulo_video,
-          }); // montar template de email
-
-          for (const admin of admins) {
-            if (usuario.cpf !== admin.cpf) {
-              const enviado = await sendMail(admin.email, 'Novo comentário na plataforma LeLearn', template); // enviar email
-              if (!enviado) JSON.stringify({ erros: ['Falha ao enviar email'] });
-            }
-          }
-        }
-
-        else if (usuario.tipo === 0) { // ADM RESPONDEU
-          if (usuario.cpf !== comentarioPai.cpf) {
-            // enviar para usuario do comentario pai
-            const templatePai = await templates.notification2({
-              video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
-            });
-
-            const enviado1 = await sendMail(comentarioPai.usuario.email, 'Novo comentário na plataforma LeLearn', templatePai); // enviar email
-            if (!enviado1) JSON.stringify({ erros: ['Falha ao enviar email'] });
-
-            // enviar para usuario das respostas comentario pai
-            if (comentarioPai.respostas.length > 1) {
-              for (const resposta of comentarioPai.respostas) {
-                const templateResposta = await templates.notification5({
-                  video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
-                });
-                if (usuario.cpf !== resposta.cpf) {
-                  const enviado2 = await sendMail(resposta.email, 'Novo comentário na plataforma LeLearn', templateResposta); // enviar email
-                  if (!enviado2) return JSON.stringify({ erros: ['Falha ao enviar email'] });
-                }
-              }
-            }
-          }
-        }
-
-        else if (usuario.tipo === 1) { // USUARIO RESPONDEU
-          // enviar email para administradores
-          const template = await templates.notification4({
-            nome: usuario.nome, video: video.cod_video, curso: comentario.cod_curso, titulo: video.titulo_video,
+        if (usuario.tipo === 0) { //  ADM RESPONDEU
+          const template = await comentarioTemplate({
+            video: video.cod_video, curso: comentario.cod_curso, titulo: video.titulo_video,
           });
 
-          for (const admin of admins) {
-            if (usuario.cpf !== admin.cpf) {
-              const enviado = await sendMail(admin.email, 'Novo comentário na plataforma LeLearn', template);
-              if (!enviado) JSON.stringify({ erros: ['Falha ao enviar email'] });
-            }
-          }
+          const emails = [];
+          if (respostaEmails) emails.push(respostaEmails);
+          if (comentarioPai && usuario.cpf !== comentarioPai.cpf && comentarioPai) emails.push(comentarioPai.usuario.email);
 
-          // enviar email para usuario do comentario pai
-          const templatePai = await templates.notification3({
-            nome: usuario.nome, video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
-          });
+          const enviado = await sendMail(emails, 'Novo comentário na plataforma LeLearn', template);
+          if (!enviado) return JSON.stringify({ erros: ['Falha ao enviar email'] });
 
-          const enviado1 = await sendMail(comentarioPai.usuario.email, 'Novo comentário na plataforma LeLearn', templatePai);
-          if (!enviado1) JSON.stringify({ erros: ['Falha ao enviar email'] });
-
-          // enviar email para usuarios das respostas
-          if (comentarioPai.respostas.length > 1) {
-            for (const resposta of comentarioPai.respostas) {
-              const templateResposta = await templates.notification6({
-                nome: resposta.usuario.nome, video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
-              });
-              if (usuario.cpf !== resposta.cpf) {
-                const enviado2 = await sendMail(resposta.email, 'Novo comentário na plataforma LeLearn', templateResposta);
-                if (!enviado2) return JSON.stringify({ erros: ['Falha ao enviar email'] });
-              }
-            }
-          }
+          // if (respostaEmails > 0) { // enviar para usuario das respostas comentario pai
+          //   const enviado2 = await sendMail(respostaEmails, 'Novo comentário na plataforma LeLearn', template);
+          //   if (!enviado2) return JSON.stringify({ erros: ['Falha ao enviar email'] });
+          // }
         }
-
-        // const obj = {
-        //   tipo: (comentario.comentario_pai ? (usuario.tipo === 0 ? 0 : 2) : 1), // eslint-disable-line
-        //   cod_comentario: comentario.comentario_pai || comentario.cod_comentario,
-        //   cod_video: comentario.cod_video,
-        //   cod_curso: comentario.cod_curso,
-        // };
-
-        // await Notificacao.create(obj);
+        // else if (usuario.tipo === 1) { // USUARIO RESPONDEU
+        //   // enviar email para usuario do comentario pai
+        //   if (usuario.cpf !== comentarioPai.cpf) {
+        //     const templatePai = await templates.notification3({
+        //       nome: usuario.nome, video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
+        //     });
+        //     const enviado1 = await sendMail(comentarioPai.usuario.email, 'Novo comentário na plataforma LeLearn', templatePai);
+        //     if (!enviado1) JSON.stringify({ erros: ['Falha ao enviar email'] });
+        //   }
+        //   // enviar email para usuarios das respostas
+        //   // if (respostaEmails > 1) {
+        //   //   const templateResposta = await templates.notification6({
+        //   //     video: video.cod_video, titulo: video.titulo_video, curso: comentario.cod_curso,
+        //   //   });
+        //   //   const enviado2 = await sendMail(respostaEmails, 'Novo comentário na plataforma LeLearn', templateResposta);
+        //   //   if (!enviado2) return JSON.stringify({ erros: ['Falha ao enviar email'] });
+        //   // }
+        // }
       } catch (error) {
         console.log(error);
         return JSON.stringify({
