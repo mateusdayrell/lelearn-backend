@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const helmet = require('helmet');
+// const helmet = require('helmet');
 // const delay = require('express-delay');
 const { resolve } = require('path');
 const routes = require('./routes/routes');
@@ -11,14 +11,9 @@ dotenv.config();
 
 const whiteList = [
   'http://localhost:3000',
-  'https://a361-177-101-41-201.sa.ngrok.io',
-  'https://a361-177-101-41-201.sa.ngrok.io/',
   'http://localhost:3333',
-  'tcp://0.tcp.sa.ngrok.io:16264',
-  '0.tcp.sa.ngrok.io',
-  '0.tcp.sa.ngrok.io:16264',
-  // 'https://48dc-138-99-191-36.sa.ngrok.io/',
-  // 'https://48dc-138-99-191-36.sa.ngrok.io',
+  'https://llrn-frontend.vercel.app',
+  'lelearn.cmjgbmzbadlu.us-west-2.rds.amazonaws.com',
 ];
 
 const corsOptions = {
