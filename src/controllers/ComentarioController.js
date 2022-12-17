@@ -93,8 +93,12 @@ module.exports = {
           ],
         });
 
-        comentarioPai.set({ resolvido: 0 });
-        await comentarioPai.save();
+        const usuario = await Usuario.findByPk(req.body.cpf);
+
+        if (usuario.cpf !== comentarioPai.cpf && usuario.tipo === 1) {
+          comentarioPai.set({ resolvido: 0 });
+          await comentarioPai.save();
+        }
       }
 
       return res.json({ novoComentario, comentarioPai });
