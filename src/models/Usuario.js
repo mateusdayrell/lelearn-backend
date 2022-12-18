@@ -41,7 +41,10 @@ class Usuario extends Model {
           type: DataTypes.STRING,
           defaultValue: '',
           allowNull: false,
-          unique: true,
+          unique: {
+            args: true,
+            msg: 'O email informado já está sendo utilizado.',
+          },
           validate: {
             isEmail: {
               msg: 'Email inválido.',

@@ -2,7 +2,7 @@ const multer = require('multer');
 const { extname, resolve } = require('path');
 
 const aleatorio = () => Math.floor(Math.random() * 1000 + 1000);
-const maxSize = 500000; // 0.5MB
+const maxSize = 2000000; // 2MB
 
 module.exports = {
   limits: { fileSize: maxSize },
