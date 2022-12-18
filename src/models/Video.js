@@ -37,6 +37,7 @@ class Video extends Model {
         desc_video: {
           type: DataTypes.STRING,
           allowNull: true,
+          defaultValue: '',
           validate: {
             len: {
               args: [0, 150],

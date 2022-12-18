@@ -47,6 +47,7 @@ class Treinamento extends Model {
         desc_treinamento: {
           type: DataTypes.STRING,
           allowNull: true,
+          defaultValue: '',
           validate: {
             len: {
               args: [0, 150],
