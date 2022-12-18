@@ -248,9 +248,9 @@ module.exports = {
         ${nome_treinamento || cpf || cod_curso || status !== 'ambos' ? 'WHERE' : ''}
         ${nome_treinamento ? ` T.nome_treinamento LIKE '%${nome_treinamento}%' ` : ''}
         ${nome_treinamento && (cpf || cod_curso) ? 'AND' : ''}
-        ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = ${cpf} AND TU.cod_treinamento = T.cod_treinamento)` : ''}
+        ${cpf ? `(SELECT TU.cpf FROM treinamentos_usuarios TU WHERE TU.cpf = '${cpf}' AND TU.cod_treinamento = T.cod_treinamento)` : ''}
         ${cpf && cod_curso ? 'AND' : ''}
-        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${cod_curso} AND TC.cod_treinamento = T.cod_treinamento) ` : ' '}
+        ${cod_curso ? `(SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = '${cod_curso}' AND TC.cod_treinamento = T.cod_treinamento) ` : ' '}
         ${(nome_treinamento || cpf || cod_curso) && status && status !== 'ambos' ? 'AND' : ''}
         ${status === 'inativo' ? ' T.deleted_at IS NOT NULL ' : status === 'ativo' ? ' T.deleted_at IS NULL ' : ''}
         ORDER BY T.nome_treinamento`,
@@ -277,22 +277,23 @@ module.exports = {
 
       const usuarioCursos = await Treinamento.sequelize.query(
         `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at, T.cod_treinamento, T.nome_treinamento, T.desc_treinamento,
-        (SELECT TU.cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = T.cod_treinamento AND TU.cpf = ${cpf}) as cursos_concluidos,
+        (SELECT TU.cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = T.cod_treinamento AND TU.cpf = '${cpf}') as cursos_concluidos,
         (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
-        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = ${cpf} AND UV.cod_curso = c.cod_curso) as videos_assistidos
+        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV where UV.cpf = '${cpf}' AND UV.cod_curso = c.cod_curso) as videos_assistidos
          FROM cursos C, treinamentos_cursos TC, treinamentos T
          WHERE C.deleted_at IS NULL AND
-         TC.cod_treinamento = ${id} AND
+         TC.cod_treinamento = '${id}' AND
          TC.cod_curso = C.cod_curso AND
-         T.cod_treinamento = ${id}
+         T.cod_treinamento = '${id}'
          ORDER BY C.nome_curso`,
         { type: QueryTypes.SELECT },
       );
 
       return res.json(usuarioCursos);
     } catch (error) {
+      console.log(error);
       return res.status(400).json({
-        erros: error.errors.map((err) => err.message),
+        erros: error, // .errors.map((err) => err.message),
       });
     }
   },
