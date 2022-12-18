@@ -214,7 +214,7 @@ module.exports = {
       const usuarioCursos = await UsuarioVideo.sequelize.query(
         `SELECT C.cod_curso, C.nome_curso, C.desc_curso, C.nome_arquivo, C.created_at,
         (SELECT COUNT(CV.cod_video) as qt_videos FROM cursos_videos CV WHERE CV.cod_curso = C.cod_curso) as total_videos,
-        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV, cursos_videos CV1 where UV.cpf = ${id}
+        (SELECT COUNT(UV.cpf) as qt_cpf FROM usuarios_videos UV, cursos_videos CV1 where UV.cpf = '${id}'
           AND UV.cod_curso = c.cod_curso AND CV1.cod_curso = c.cod_curso AND UV.cod_video = CV1.cod_video) as videos_assistidos
          FROM cursos C WHERE C.deleted_at IS NULL ORDER BY C.nome_curso`,
         { type: QueryTypes.SELECT },
@@ -249,7 +249,7 @@ module.exports = {
         FROM treinamentos T, treinamentos_usuarios TU
         WHERE T.deleted_at IS NULL AND
         TU.cod_treinamento = T.cod_treinamento AND
-        TU.cpf = ${id} ORDER BY T.nome_treinamento`,
+        TU.cpf = '${id}' ORDER BY T.nome_treinamento`,
         { type: QueryTypes.SELECT },
       );
 
