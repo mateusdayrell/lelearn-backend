@@ -37,6 +37,7 @@ class Curso extends Model {
         desc_curso: {
           type: DataTypes.STRING(150),
           allowNull: true,
+          defaultValue: '',
           validate: {
             len: {
               args: [0, 150],

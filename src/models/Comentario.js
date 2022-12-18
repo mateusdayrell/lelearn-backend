@@ -70,6 +70,7 @@ class Comentario extends Model {
         texto: {
           type: DataTypes.STRING,
           allowNull: true,
+          defaultValue: '',
           validate: {
             len: {
               args: [0, 150],
