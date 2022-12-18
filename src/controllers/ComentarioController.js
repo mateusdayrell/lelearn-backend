@@ -291,13 +291,15 @@ module.exports = {
 
       const comentario = await Comentario.findByPk(id, { include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } });
 
+      const resolvido = comentario.resolvido ? 0 : 1;
+
       if (!comentario) {
         return res.status(400).json({
           erros: ['Comentario não existe.'],
         });
       }
 
-      comentario.set({ resolvido: 1 });
+      comentario.set({ resolvido });
       await comentario.save();
 
       const respostas = await comentario.getRespostas({ include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } });
@@ -305,9 +307,9 @@ module.exports = {
       // eslint-disable-next-line no-restricted-syntax
       for (const r of respostas) {
         const resposta = await Comentario.findByPk(r.cod_comentario);
-        r.resolvido = true;
+        r.resolvido = resolvido === 1;
         if (resposta.resolvido === false) {
-          resposta.set({ resolvido: 1 });
+          resposta.set({ resolvido });
           await resposta.save();
         }
       }
