@@ -2,7 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   dialect: 'mysql',
-  dialectModule: require('mysql2'),
+  dialectModule: require('mysql2'), // eslint-disable-line
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   username: process.env.DB_USERNAME,
@@ -16,8 +16,11 @@ module.exports = {
     updatedAt: 'updated_at',
   },
   dialectOptoins: {
-    timezone: 'local',
+    useUTC: false, // for reading from database
+    dateStrings: true,
+    typeCast: true,
   },
+  timezone: 'America/Sao_Paulo',
   pool: {
     max: 5,
     min: 0,
