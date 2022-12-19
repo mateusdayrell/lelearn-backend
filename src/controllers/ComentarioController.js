@@ -1,4 +1,4 @@
-const { fn, col, Op } = require('sequelize');
+const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const Comentario = require('../models/Comentario');
 const Usuario = require('../models/Usuario');
@@ -24,21 +24,10 @@ module.exports = {
           ],
         },
         include: [
-          {
-            model: Comentario,
-            as: 'respostas',
-            where: {
-              [Op.and]: [
-                sequelize.literal('`respostas`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
-                sequelize.literal('`respostas`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
-              ],
-            },
-            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
-          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: sequelize.literal('`respostas`.`created_at` DESC'),
+        order: [['created_at', 'DESC']],
       });
       return res.json(comentarios);
     } catch (error) {
@@ -71,7 +60,7 @@ module.exports = {
             model: Comentario,
             as: 'respostas',
             include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
-            where: sequelize.literal('`respostas`.`cpf` IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
+            where: sequelize.literal('`respostas`.`cod_comentario` IN (SELECT C.cod_comentario FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`))'),
           },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
@@ -193,25 +182,21 @@ module.exports = {
         });
       }
 
+      const usuarios = await Usuario.findAll({ attributes: ['cpf'], raw: true });
+      const cpfs = usuarios.map((u) => `'${u.cpf}'`);
+
       const comentarios = await Comentario.findAll({
         where: {
           [Op.and]: [
             { cod_video },
             { comentario_pai: null },
-            sequelize.literal('`Comentario`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
+            sequelize.literal(`\`Comentario\`.\`cpf\` IN (${cpfs})`),
           ],
         },
         attributes: {
-          include: [[fn('COUNT', col('respostas.cod_comentario')), 'respostas_qtd']],
+          include: [[sequelize.literal(`(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = \`Comentario\`.\`cod_comentario\` AND C.cpf IN(${cpfs}))`), 'respostas_qtd']],
         },
         include: [
-          {
-            model: Comentario,
-            as: 'respostas',
-            attributes: [],
-            where:
-              sequelize.literal('`respostas`.`cpf` IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
-          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         ],
         order: [['created_at', 'DESC']],
