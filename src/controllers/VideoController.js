@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 const Video = require('../models/Video');
 const Curso = require('../models/Curso');
 const Comentario = require('../models/Comentario');
@@ -30,7 +31,9 @@ module.exports = {
             }],
           },
           {
-            model: Comentario, as: 'comentarios',
+            model: Comentario,
+            as: 'comentarios',
+            where: sequelize.literal('`comentarios`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `comentarios`.`cpf`)'),
           },
         ],
         order: [['comentarios', 'created_at', 'DESC']],
