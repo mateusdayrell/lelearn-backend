@@ -14,16 +14,27 @@ module.exports = {
             { comentario_pai: null },
             { resolvido: 0 },
             sequelize.literal('`Comentario`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
+            sequelize.literal('`Comentario`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
           ],
         },
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+            [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_total'],
+            [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.resolvido = 0 AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_pendentes'],
           ],
         },
         include: [
-          { model: Comentario, as: 'respostas', include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } },
+          {
+            model: Comentario,
+            as: 'respostas',
+            where: {
+              [Op.and]: [
+                sequelize.literal('`respostas`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
+                sequelize.literal('`respostas`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
+              ],
+            },
+            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
@@ -31,7 +42,6 @@ module.exports = {
       });
       return res.json(comentarios);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
       });
@@ -51,8 +61,8 @@ module.exports = {
       const comentario = await Comentario.findByPk(id, {
         attributes: {
           include: [
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios WHERE comentarios.comentario_pai  = '${id}')`), 'respostas_total'],
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios WHERE comentarios.comentario_pai = '${id}' AND resolvido = 0)`), 'respostas_pendentes'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai  = '${id}' AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))`), 'respostas_total'],
+            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = '${id}' AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf) AND resolvido = 0)`), 'respostas_pendentes'],
           ],
         },
         include: [
@@ -61,12 +71,12 @@ module.exports = {
             model: Comentario,
             as: 'respostas',
             include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+            where: sequelize.literal('`respostas`.`cpf` IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
           },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
         order: [['respostas', 'created_at', 'ASC']],
       });
-
       return res.json(comentario);
     } catch (error) {
       return res.status(400).json({
@@ -84,8 +94,8 @@ module.exports = {
         comentarioPai = await Comentario.findByPk(novoComentario.comentario_pai, {
           attributes: {
             include: [
-              [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
-              [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+              [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_total'],
+              [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.resolvido = 0 AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_pendentes'],
             ],
           },
           include: [
@@ -185,13 +195,23 @@ module.exports = {
 
       const comentarios = await Comentario.findAll({
         where: {
-          cod_video, comentario_pai: null,
+          [Op.and]: [
+            { cod_video },
+            { comentario_pai: null },
+            sequelize.literal('`Comentario`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
+          ],
         },
         attributes: {
           include: [[fn('COUNT', col('respostas.cod_comentario')), 'respostas_qtd']],
         },
         include: [
-          { model: Comentario, as: 'respostas', attributes: [] },
+          {
+            model: Comentario,
+            as: 'respostas',
+            attributes: [],
+            where:
+              sequelize.literal('`respostas`.`cpf` IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
+          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         ],
         order: [['created_at', 'DESC']],
@@ -200,9 +220,8 @@ module.exports = {
 
       return res.json(comentarios); // também pode enviar null
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
-        erros: error, // error.errors.map((err) => err.message),
+        erros: error.error.errors.map((err) => err.message),
       });
     }
   },
@@ -219,7 +238,10 @@ module.exports = {
 
       const comentarios = await Comentario.findAll({
         where: {
-          comentario_pai: cod_comentario,
+          [Op.and]: [
+            { comentario_pai: cod_comentario },
+            sequelize.literal('`Comentario`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
+          ],
         },
         include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
         order: [['created_at', 'ASC']],
@@ -227,9 +249,8 @@ module.exports = {
 
       return res.json(comentarios); // também pode enviar null
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
-        erros: error, // error.errors.map((err) => err.message),
+        erros: error.error.errors.map((err) => err.message),
       });
     }
   },
@@ -255,16 +276,27 @@ module.exports = {
             resolvido !== 'ambos' && ({ resolvido: resolvido }), // eslint-disable-line
             { comentario_pai: null },
             sequelize.literal('`Comentario`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
+            sequelize.literal('`Comentario`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
           ],
         },
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario`)'), 'respostas_total'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND resolvido = 0)'), 'respostas_pendentes'],
+            [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_total'],
+            [sequelize.literal('(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.resolvido = 0 AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = C.cpf))'), 'respostas_pendentes'],
           ],
         },
         include: [
-          { model: Comentario, as: 'respostas', include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } },
+          {
+            model: Comentario,
+            as: 'respostas',
+            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+            where: {
+              [Op.and]: [
+                sequelize.literal('`respostas`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
+                sequelize.literal('`respostas`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
+              ],
+            },
+          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
@@ -302,16 +334,16 @@ module.exports = {
       comentario.set({ resolvido });
       await comentario.save();
 
-      const respostas = await comentario.getRespostas({ include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] } });
-
+      const respostas = await comentario.getRespostas({
+        include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
+        where: sequelize.literal('`Comentario`.`cpf` IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `Comentario`.`cpf`)'),
+      });
       // eslint-disable-next-line no-restricted-syntax
       for (const r of respostas) {
         const resposta = await Comentario.findByPk(r.cod_comentario);
-        r.resolvido = resolvido === 1;
-        if (resposta.resolvido === false) {
-          resposta.set({ resolvido });
-          await resposta.save();
-        }
+        r.resolvido = resolvido === 1 ? 1 : 0;
+        resposta.set({ resolvido });
+        await resposta.save();
       }
 
       return res.json({ comentario, respostas });
@@ -356,8 +388,6 @@ const validateBody = async (body, res) => {
 
     return erros;
   } catch (error) {
-    console.log(error);
-
     return res.status(400).json({
       erros: error,
     });
