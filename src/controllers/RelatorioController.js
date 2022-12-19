@@ -16,12 +16,12 @@ class RelatorioController {
       const cursos = await Curso.findAll({
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`)'), 'videos_qtd'],
-            [sequelize.literal('(SELECT COUNT(cod_treinamento) FROM treinamentos_cursos TC WHERE TC.cod_curso = `Curso`.`cod_curso`)'), 'treinamentos_qtd'],
-            [sequelize.literal('(SELECT COUNT(DISTINCT(cpf)) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso`)'), 'alcance_usuarios'],
-            [sequelize.literal('(SELECT COUNT(cod_curso) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso`)'), 'visualizacoes'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`))'), 'comentarios_qtd'],
-            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso`) AND C.resolvido = 1)'), 'comentarios_resolvidos_qtd'],
+            [sequelize.literal('(SELECT COUNT(CV.cod_video) FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso` AND CV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = CV.cod_video AND V.deleted_at IS NULL))'), 'videos_qtd'],
+            [sequelize.literal('(SELECT COUNT(TC.cod_treinamento) FROM treinamentos_cursos TC WHERE TC.cod_curso = `Curso`.`cod_curso` AND TC.cod_treinamento = (SELECT T.cod_treinamento FROM treinamentos T WHERE T.cod_treinamento = TC.cod_treinamento AND T.deleted_at IS NULL))'), 'treinamentos_qtd'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT(UV.cpf)) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso` AND UV.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = UV.cpf AND U.deleted_at IS NULL) AND UV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = UV.cod_video AND V.deleted_at IS NULL))'), 'alcance_usuarios'],
+            [sequelize.literal('(SELECT COUNT(UV.cod_curso) FROM usuarios_videos UV WHERE UV.cod_curso = `Curso`.`cod_curso` AND UV.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = UV.cpf AND U.deleted_at IS NULL) AND UV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = UV.cod_video AND V.deleted_at IS NULL))'), 'visualizacoes'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso` AND CV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = CV.cod_video AND V.deleted_at IS NULL)) AND C.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = C.cpf AND U.deleted_at IS NULL))'), 'comentarios_qtd'],
+            [sequelize.literal('(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso = `Curso`.`cod_curso` AND CV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = CV.cod_video AND V.deleted_at IS NULL)) AND C.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = C.cpf AND U.deleted_at IS NULL) AND C.resolvido = 1)'), 'comentarios_resolvidos_qtd'],
           ],
         },
         order: ['nome_curso'],
@@ -127,14 +127,23 @@ class RelatorioController {
         });
       }
 
+      const usuarios = await Usuario.findAll({ attributes: ['cpf'], raw: true });
+      const cpfs = usuarios.map((u) => `'${u.cpf}'`);
+
+      const videos = await Video.findAll({ attributes: ['cod_video'], raw: true });
+      const codVideos = videos.map((v) => `'${v.cod_video}'`);
+
+      const cursos = await Curso.findAll({ attributes: ['cod_curso'], raw: true });
+      const codCursos = cursos.map((c) => `'${c.cod_curso}'`);
+
       const treinamento = await Treinamento.findByPk(id, {
         attributes: {
           include: [
-            [sequelize.literal(`(SELECT COUNT(cpf) FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = ${id})`), 'total_usuarios'],
-            [sequelize.literal(`(SELECT COUNT(cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})`), 'total_cursos'],
-            [sequelize.literal(`(SELECT COUNT(cod_video) FROM cursos_videos CV WHERE CV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}))`), 'total_videos'],
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})))`), 'total_comentarios'],
-            [sequelize.literal(`(SELECT COUNT(cod_comentario) FROM comentarios C WHERE C.cod_video IN (SELECT cod_video FROM cursos_videos CV WHERE CV.cod_curso in (SELECT cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id})) AND C.resolvido = 1)`), 'total_comentarios_resolvidos'],
+            [sequelize.literal(`(SELECT COUNT(TU.cpf) FROM treinamentos_usuarios TU WHERE TU.cod_treinamento = ${id} AND TU.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = TU.cpf AND U.deleted_at IS NULL))`), 'total_usuarios'],
+            [sequelize.literal(`(SELECT COUNT(TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id} AND TC.cod_curso = (SELECT C.cod_curso FROM cursos C WHERE C.cod_curso = TC.cod_curso AND C.deleted_at IS NULL))`), 'total_cursos'],
+            [sequelize.literal(`(SELECT COUNT(CV.cod_video) FROM cursos_videos CV WHERE CV.cod_curso in (SELECT (TC.cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id} AND TC.cod_curso = (SELECT C.cod_curso FROM cursos C WHERE C.cod_curso = TC.cod_curso AND C.deleted_at IS NULL)) AND CV.cod_video = (SELECT V.cod_video FROM videos V WHERE V.cod_video = CV.cod_video AND V.deleted_at IS NULL))`), 'total_videos'],
+            [sequelize.literal(`(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = C.cpf AND U.deleted_at IS NULL) AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_video = (SELECT V.cod_video FROM videos V where V.cod_video = CV.cod_video AND V.deleted_at IS NULL) AND CV.cod_curso in (SELECT TC.cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id} AND TC.cod_curso = (SELECT CUR.cod_curso FROM cursos CUR WHERE CUR.cod_curso = TC.cod_curso AND CUR.deleted_at IS NULL))))`), 'total_comentarios'],
+            [sequelize.literal(`(SELECT COUNT(C.cod_comentario) FROM comentarios C WHERE C.cpf = (SELECT U.cpf FROM usuarios U WHERE U.cpf = C.cpf AND U.deleted_at IS NULL) AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_video = (SELECT V.cod_video FROM videos V where V.cod_video = CV.cod_video AND V.deleted_at IS NULL) AND CV.cod_curso in (SELECT TC.cod_curso from treinamentos_cursos TC WHERE TC.cod_treinamento = ${id} AND TC.cod_curso = (SELECT CUR.cod_curso FROM cursos CUR WHERE CUR.cod_curso = TC.cod_curso AND CUR.deleted_at IS NULL))) AND C.resolvido = 1)`), 'total_comentarios_resolvidos'],
           ],
         },
         include: [
@@ -143,9 +152,9 @@ class RelatorioController {
             as: 'usuarios',
             attributes: {
               include: [
-                [sequelize.literal(`IF((SELECT cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cpf = \`usuarios\`.\`cpf\` AND TU.cod_treinamento = ${id}) = (SELECT COUNT(cod_curso) FROM treinamentos_cursos TC where TC.cod_treinamento = ${id}), true, false)`), 'concluido'],
-                [sequelize.literal(`(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cpf = \`usuarios\`.\`cpf\` AND UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}))`), 'videos_assistidos'],
-                [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios'],
+                [sequelize.literal(`IF((SELECT cursos_concluidos FROM treinamentos_usuarios TU WHERE TU.cpf = \`usuarios\`.\`cpf\` AND TU.cpf IN (${cpfs}) AND TU.cod_treinamento = ${id}) = (SELECT COUNT(cod_curso) FROM treinamentos_cursos TC where TC.cod_treinamento = ${id} AND TC.cod_curso IN (${codCursos})), true, false)`), 'concluido'],
+                [sequelize.literal(`(SELECT COUNT(cpf) FROM usuarios_videos UV WHERE UV.cpf = \`usuarios\`.\`cpf\` AND UV.cpf IN (${cpfs}) AND UV.cod_video IN (${codVideos}) AND UV.cod_curso IN (${codCursos}) AND UV.cod_curso in (SELECT (cod_curso) FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}) AND UV.cod_curso IN (${codCursos}))`), 'videos_assistidos'],
+                [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.cpf = \`usuarios\`.\`cpf\` AND C.cpf IN (${cpfs}) AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_video IN (${codVideos}}) AND CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_treinamento = ${id}) AND TC.cod_curso IN (${codCursos})))`), 'total_comentarios'],
                 // eslint-disable-next-line max-len
                 // [sequelize.literal(`(SELECT COUNT(cpf) FROM comentarios C WHERE C.resolvido = 1 AND C.cpf = \`usuarios\`.\`cpf\` AND C.cod_video IN (SELECT CV.cod_video FROM cursos_videos CV WHERE CV.cod_curso IN (SELECT TC.cod_curso FROM treinamentos_cursos TC WHERE TC.cod_curso = ${id})))`), 'total_comentarios_resolvidos'],
               ],
