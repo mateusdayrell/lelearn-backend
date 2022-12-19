@@ -59,14 +59,25 @@ module.exports = {
           {
             model: Comentario,
             as: 'respostas',
-            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
-            where: sequelize.literal('`respostas`.`cod_comentario` IN (SELECT C.cod_comentario FROM comentarios C WHERE C.comentario_pai = `Comentario`.`cod_comentario` AND C.cpf IN (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`))'),
+            include: { model: Usuario, as: 'usuario', attributes: ['nome', 'cpf', 'deleted_at'] },
           },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
         order: [['respostas', 'created_at', 'ASC']],
       });
-      return res.json(comentario);
+
+      const json = JSON.stringify(comentario);
+      const obj = JSON.parse(json);
+
+      if (obj.respostas.length > 0) {
+        const respostas = [];
+        obj.respostas.map((r) => { // eslint-disable-line
+          if (r.usuario !== null && r.usuario?.deleted_at === null) respostas.push(r);
+        });
+        obj.respostas = respostas;
+      }
+
+      return res.json(obj);
     } catch (error) {
       return res.status(400).json({
         erros: error.errors.map((err) => err.message),
