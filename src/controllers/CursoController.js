@@ -1,10 +1,12 @@
 const { Op } = require('sequelize');
 
+const sequelize = require('sequelize');
 const Curso = require('../models/Curso');
 const Video = require('../models/Video');
 const upload = require('../services/multer');
 const { apagarFotoCurso } = require('../helpers/CursoHelper');
 const CursoVideo = require('../models/CursoVideo');
+const Usuario = require('../models/Usuario');
 
 module.exports = {
   async index(req, res) {
@@ -322,6 +324,42 @@ module.exports = {
 
       return res.json(videos);
     } catch (error) {
+      return res.json(null);
+    }
+  },
+
+  async mostWatched(req, res) {
+    try {
+      console.log('AAAAAAAAAAAA');
+      const videos = await Video.findAll({ attributes: ['cod_video'], raw: true });
+      const codVideos = videos.map((v) => `'${v.cod_video}'`);
+
+      const cur = await Curso.findAll({ attributes: ['cod_curso'], raw: true });
+      const codCursos = cur.map((c) => `'${c.cod_curso}'`);
+
+      const usuarios = await Usuario.findAll({ attributes: ['cpf'], raw: true });
+      const cpfs = usuarios.map((u) => `'${u.cpf}'`);
+
+      const cursos = await Curso.findAll({
+        attributes: {
+          include: [[sequelize.literal(`(SELECT COUNT(cod_curso) FROM usuarios_videos WHERE cod_video IN (${codVideos}) AND cod_curso IN (${codCursos}) AND cpf IN (${cpfs}) AND cod_curso = \`Curso\`.\`cod_curso\` )`), 'visualizacoes']],
+        },
+        limit: 3,
+        order: [['visualizacoes', 'DESC']],
+      });
+
+      const json = JSON.stringify(cursos);
+      const obj = JSON.parse(json);
+
+      const arr = [];
+
+      obj.map((c) => { // eslint-disable-line
+        if (c.visualizacoes > 0) arr.push(c);
+      });
+
+      return res.json(arr);
+    } catch (error) {
+      console.log(error);
       return res.json(null);
     }
   },
