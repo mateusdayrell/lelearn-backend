@@ -47,6 +47,7 @@ router.post('/cursos/', cursoController.store);
 router.put('/cursos/:id', cursoController.update);
 router.put('/cursos/activate/:id', cursoController.activate);
 router.delete('/cursos/:id', cursoController.destroy);
+router.get('/cursos-mais-assistidos/', cursoController.mostWatched);
 
 // VIDEOS
 router.get('/videos/', videoController.index);
