@@ -282,21 +282,10 @@ module.exports = {
           ],
         },
         include: [
-          {
-            model: Comentario,
-            as: 'respostas',
-            include: { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
-            where: {
-              [Op.and]: [
-                sequelize.literal('`respostas`.`cpf` = (SELECT U.cpf from usuarios U WHERE U.deleted_at IS NULL AND U.cpf = `respostas`.`cpf`)'),
-                sequelize.literal('`respostas`.`cod_video` IN (SELECT V.cod_video from videos V WHERE V.deleted_at IS NULL)'),
-              ],
-            },
-          },
           { model: Usuario, as: 'usuario', attributes: ['cpf', 'nome'] },
           { model: Video, as: 'video', include: { model: Curso, as: 'cursos', attributes: ['cod_curso', 'nome_curso'] } },
         ],
-        order: sequelize.literal('`respostas`.`created_at` DESC'),
+        order: [['created_at', 'DESC']],
       });
 
       return res.json(comentarios);
