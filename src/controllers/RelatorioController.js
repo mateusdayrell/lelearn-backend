@@ -58,7 +58,7 @@ class RelatorioController {
           return [];
         },
         content: [
-          { text: `Relatório de cursos - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: `Relatório de cursos - ${moment().format('DD/MM/YYYY')} \n\n\n`, style: 'contentHeader' },
           {
             style: 'table',
             table: {
@@ -213,7 +213,7 @@ class RelatorioController {
           return [];
         },
         content: [
-          { text: `Relatório de treinamento - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: `Relatório de treinamento - ${moment().format('DD/MM/YYYY')} \n\n\n`, style: 'contentHeader' },
           { text: 'Dados do treinamento:\n\n', style: 'title' },
           {
             columns: [
@@ -397,7 +397,7 @@ class RelatorioController {
           return [];
         },
         content: [
-          { text: `Relatório de treinamentos do usuário - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: `Relatório de treinamentos do usuário - ${moment().format('DD/MM/YYYY')} \n\n\n`, style: 'contentHeader' },
           { text: 'Dados do usuário:\n\n', style: 'title' },
           {
             columns: [
@@ -578,7 +578,7 @@ class RelatorioController {
           return [];
         },
         content: [
-          { text: `Relatório de cursos do usuário - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: `Relatório de cursos do usuário - ${moment().format('DD/MM/YYYY')} \n\n\n`, style: 'contentHeader' },
           { text: 'Dados do usuário:\n\n', style: 'title' },
           {
             columns: [
@@ -726,7 +726,7 @@ class RelatorioController {
           return [];
         },
         content: [
-          { text: `Relatório de vídeos - ${moment().format('DD/MM/YYYY HH:mm:ss')} \n\n\n`, style: 'contentHeader' },
+          { text: `Relatório de vídeos - ${moment().format('DD/MM/YYYY')} \n\n\n`, style: 'contentHeader' },
           {
             style: 'table',
             table: {
