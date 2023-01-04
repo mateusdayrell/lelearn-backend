@@ -1,4 +1,4 @@
-# Lelearn API
+# LeLearn API
 
 :round_pushpin: To check the project website [click here!](https://llrn-backend-sjy1.vercel.app/)
 
