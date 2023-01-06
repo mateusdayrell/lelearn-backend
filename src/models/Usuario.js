@@ -21,13 +21,13 @@ class Usuario extends Model {
           allowNull: false,
           validate: {
             len: {
-              args: [3, 40],
-              msg: 'O nome deve ter entre 3 e 40 caracteres.',
+              args: [3, 255],
+              msg: 'O nome deve ter entre 3 e 255 caracteres.',
             },
           },
         },
         telefone: {
-          type: DataTypes.STRING,
+          type: DataTypes.STRING(11),
           defaultValue: '',
           allowNull: true,
           validate: {

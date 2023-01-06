@@ -29,8 +29,8 @@ class Treinamento extends Model {
           },
           validate: {
             len: {
-              args: [3, 30],
-              msg: 'O nome do treinamento deve ter entre 3 e 30 caracteres.',
+              args: [3, 255],
+              msg: 'O nome do treinamento deve ter entre 3 e 255 caracteres.',
             },
           },
         },
@@ -45,13 +45,13 @@ class Treinamento extends Model {
           },
         },
         desc_treinamento: {
-          type: DataTypes.STRING,
+          type: DataTypes.TEXT(900),
           allowNull: true,
           defaultValue: '',
           validate: {
             len: {
-              args: [0, 150],
-              msg: 'A descrição do treinamento deve ter no máximo 150 caracteres.',
+              args: [0, 900],
+              msg: 'A descrição do treinamento deve ter no máximo 900 caracteres.',
             },
           },
         },

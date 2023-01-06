@@ -7,16 +7,16 @@ module.exports = {
         primaryKey: true,
       },
       titulo_video: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
       desc_video: {
-        type: Sequelize.STRING(150),
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       link: {
-        type: Sequelize.STRING(150),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       created_at: {

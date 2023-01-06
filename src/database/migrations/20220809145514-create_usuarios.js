@@ -7,7 +7,7 @@ module.exports = {
         primaryKey: true,
       },
       nome: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       telefone: {
@@ -15,7 +15,7 @@ module.exports = {
         allowNull: true,
       },
       email: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },

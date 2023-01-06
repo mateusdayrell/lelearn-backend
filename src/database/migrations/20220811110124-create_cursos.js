@@ -7,16 +7,16 @@ module.exports = {
         primaryKey: true,
       },
       nome_curso: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
       desc_curso: {
-        type: Sequelize.STRING(150),
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       nome_arquivo: {
-        type: Sequelize.STRING(23),
+        type: Sequelize.STRING,
         allowNull: true,
       },
       videos_qtd: {

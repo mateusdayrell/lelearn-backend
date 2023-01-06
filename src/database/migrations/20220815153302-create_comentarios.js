@@ -47,7 +47,7 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
       texto: {
-        type: Sequelize.STRING(150),
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       resolvido: {
