@@ -7,7 +7,7 @@ module.exports = {
         primaryKey: true,
       },
       nome_treinamento: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
@@ -16,7 +16,7 @@ module.exports = {
         allowNull: false,
       },
       desc_treinamento: {
-        type: Sequelize.STRING(150),
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       created_at: {

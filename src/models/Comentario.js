@@ -68,13 +68,13 @@ class Comentario extends Model {
           },
         },
         texto: {
-          type: DataTypes.STRING,
-          allowNull: true,
+          type: DataTypes.TEXT(900),
+          allowNull: false,
           defaultValue: '',
           validate: {
             len: {
-              args: [0, 150],
-              msg: 'O comentário deve ter no máximo 150 caracteres.',
+              args: [0, 900],
+              msg: 'O comentário deve ter no máximo 900 caracteres.',
             },
           },
         },

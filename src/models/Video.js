@@ -29,19 +29,19 @@ class Video extends Model {
           },
           validate: {
             len: {
-              args: [0, 40],
-              msg: 'O título do vídeo deve ter no máximo 40 caracteres.',
+              args: [0, 255],
+              msg: 'O título do vídeo deve ter no máximo 255 caracteres.',
             },
           },
         },
         desc_video: {
-          type: DataTypes.STRING,
+          type: DataTypes.TEXT(900),
           allowNull: true,
           defaultValue: '',
           validate: {
             len: {
-              args: [0, 150],
-              msg: 'A descrição do vídeo deve ter no máximo 150 caracteres.',
+              args: [0, 900],
+              msg: 'A descrição do vídeo deve ter no máximo 900 caracteres.',
             },
           },
         },
@@ -50,8 +50,8 @@ class Video extends Model {
           allowNull: false,
           validate: {
             len: {
-              args: [0, 150],
-              msg: 'O link do vídeo deve ter no máximo 150 caracteres.',
+              args: [0, 255],
+              msg: 'O link do vídeo deve ter no máximo 255 caracteres.',
             },
           },
         },
