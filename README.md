@@ -29,7 +29,7 @@ npm install
 
 ### Copy .env.example to .env
 ```
-cp .env.example .env
+cp .env.example .env.local
 ```
 
 ### Run the migrations
